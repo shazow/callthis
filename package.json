@@ -23,6 +23,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@walletconnect/ethereum-provider": "^2.10.1",
+		"@walletconnect/modal": "^2.6.2",
 		"viem": "^1.9.2"
 	}
 }
