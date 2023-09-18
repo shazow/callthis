@@ -21,44 +21,31 @@
 
 <form on:submit|preventDefault="{handleSubmit}">
   <label>
+    <span>From</span>
+    <input type="text" name="from" bind:value={from} readonly disabled />
+  </label>
+
+  <label>
     <span>Address</span>
-    <input type="text" name="address" bind:value={address} readonly />
+    <input type="text" name="address" bind:value={address} required pattern="(0x[a-fA-F0-9]{40})|(\w+\.\w+)" />
   </label>
 
   <label>
     <span>Calldata</span>
-    <input type="text" name="calldata" bind:value={calldata} readonly />
-  </label>
-
-  <label>
-    <input type="submit" value="Execute Transaction" disabled="{ !provider }">
+    <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
   </label>
 
   <label>
     <slot name="connect">Connect Wallet</slot>
   </label>
+
+  <label>
+    <input type="submit" value="Execute Transaction" disabled="{ !provider }">
+  </label>
 </form>
 
 <style lang="scss">
-  label {
-    display: block;
-    margin-bottom: 1rem;
-    align-items: center;
-
-    span {
-      font-weight: bold;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      display: block;
-    }
-  }
-
-  input {
-    display: block;
-    min-width: 12rem;
-    padding: 0.5rem 0.8rem;
-    border-radius: 5px;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    margin-right: 1rem;
+  form {
+    width: 30rem;
   }
 </style>

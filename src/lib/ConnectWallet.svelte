@@ -53,7 +53,8 @@
     margin: 0.5rem;
   }
   dl {
-    display: inline-block;
+    display: flex;
+    flex-wrap: wrap;
     font-weight: bold;
     color: var(--connected-color);
     border: var(--connected-border);
@@ -67,6 +68,7 @@
     margin: 0;
   }
   dd {
+    flex-grow: 1;
     background: rgba(0, 100, 0, 0.2);
     border-left: var(--connected-border);
     font-family: monospace;
