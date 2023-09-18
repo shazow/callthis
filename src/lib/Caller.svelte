@@ -31,27 +31,30 @@
   </label>
 
   <label>
-    <span></span>
     <input type="submit" value="Execute Transaction" disabled="{ !provider }">
+  </label>
+
+  <label>
     <slot name="connect">Connect Wallet</slot>
   </label>
 </form>
 
 <style lang="scss">
   label {
-    display: flex;
+    display: block;
     margin-bottom: 1rem;
     align-items: center;
 
     span {
-      display: inline-block;
-      min-width: 10rem;
-      text-align: right;
-      margin-right: 1rem;
+      font-weight: bold;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      display: block;
     }
   }
 
   input {
+    display: block;
     min-width: 12rem;
     padding: 0.5rem 0.8rem;
     border-radius: 5px;
