@@ -10,14 +10,18 @@
   {/if}
 
 {:else}
-  <dl>
-    <dt>Connected</dt>
-    <dd>{ accounts[0] }</dd>
-  </dl>
+  <slot name="connected">
+    <dl>
+      <dt>Connected</dt>
+      <dd>{ accounts[0] }</dd>
+    </dl>
+  </slot>
 {/if}
 
 <style lang="scss">
   :root {
+    --border-radius: 5px;
+
     --connect-color: rgba(255,255,255,1);
     --connect-background: rgba(50, 150, 255, 0.9);
     --connect-border: none;
@@ -29,7 +33,7 @@
   button {
     display: inline-block;
     font-weight: bold;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     padding: 0.5rem 2rem;
     margin: 0;
     cursor: pointer;
@@ -38,6 +42,10 @@
     color: var(--connect-color);
     border: var(--connect-border);
     background: var(--connect-background);
+
+    &:hover {
+      opacity: 0.8;
+    }
   }
   .loading {
     fill: var(--connect-background);
@@ -49,7 +57,7 @@
     font-weight: bold;
     color: var(--connected-color);
     border: var(--connected-border);
-    border-radius: 3px;
+    border-radius: var(--border-radius);
     background: var(--connected-background);
     margin: 0;
   }
@@ -90,7 +98,7 @@ const dispatch = createEventDispatcher();
 
 export let accounts : Array<string> = [];
 
-export let config : EthereumProviderOptions = {
+export let config = {
   // Required fields
   projectId: "",
   showQrModal: true,
@@ -133,7 +141,7 @@ export async function connect() {
   }
 
   loading = true;
-  const provider = await EthereumProvider.init(config);
+  const provider = await EthereumProvider.init(config as EthereumProviderOptions);
 
   provider.on("connect", () => {
     accounts = provider.accounts;
