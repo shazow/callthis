@@ -76,6 +76,10 @@
   }
 </style>
 
+<script lang="ts" context="module">
+export type Config = EthereumProviderOptions;
+</script>
+
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
 
@@ -100,7 +104,7 @@ const dispatch = createEventDispatcher();
 
 export let accounts : Array<string> = [];
 
-export let config = {
+export let config : Config = {
   // Required fields
   projectId: "",
   showQrModal: true,

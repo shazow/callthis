@@ -1,16 +1,20 @@
 <script lang="ts">
-  //import { ethers } from "ethers";
-  import type { ethers } from "ethers";
+  import { ethers } from "ethers";
   import { autoload } from "@shazow/whatsabi";
   import { debouncer } from "$lib/helpers";
+  import ConnectWallet from '$lib/ConnectWallet.svelte';
+  import type { Config } from '$lib/ConnectWallet.svelte';
 
-  export let provider : ethers.BrowserProvider;
+  let from : string;
+  let provider : ethers.BrowserProvider;
 
-  export let from : string;
+  export let config : Config;
   export let calldata : string;
   export let address : string;
 
   function handleSubmit() {
+    if (!provider) return;
+
     const tx = {
       from: from,
       to: address,
@@ -20,13 +24,28 @@
     provider.call(tx);
   }
 
+  async function loadAddress() {
+    const abi = await autoload(address, {
+      provider,
+      followProxies: true,
+      onProgress: (progress, ...args: any[]) => console.debug("WhatsABI: ", progress, args),
+    });
+    console.log("Loaded ABI: ", abi);
+  }
+
+  async function connect(wallet: { provider: any, accounts: string[] }) {
+    provider = new ethers.BrowserProvider(wallet.provider);
+    from = wallet.accounts[0];
+
+    loadAddress();
+  }
+
   async function handleAddress(event: Event) {
     const target = event.target as HTMLSelectElement;
     if (!target.validity.valid) return;
+    if (!provider) return;
 
-    console.log("Loading ABI for: ", address);
-    const abi = await autoload(address, { provider });
-    console.log("Loaded ABI: ", abi);
+    return loadAddress();
   }
 </script>
 
@@ -46,9 +65,9 @@
     <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
   </label>
 
-  <label>
-    <slot name="connect">Connect Wallet</slot>
-  </label>
+  <p>
+    <ConnectWallet config={ config } on:connect="{ (e) => connect(e.detail) }" />
+  </p>
 
   <label>
     <input type="submit" value="Execute Transaction" disabled={ !provider }>

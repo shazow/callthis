@@ -1,11 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { ethers } from "ethers";
 
-  import ConnectWallet from '$lib/ConnectWallet.svelte';
   import Caller from '$lib/Caller.svelte';
+  import type { Config } from '$lib/ConnectWallet.svelte';
 
-  const wcConfig = {
+  const wcConfig : Config = {
     projectId: '0d978989ffd34e4518ed5410dad59fa4', // required
     showQrModal: true,
     qrModalOptions: { themeMode: "dark" },
@@ -19,22 +18,13 @@
     },
   }
 
-  let provider : ethers.BrowserProvider;
-  let account : string;
   let address : string = $page.url.searchParams.get("address") || "";
   let calldata : string = $page.url.searchParams.get("calldata") || "";
-
-  async function connect(wallet: { provider: any, accounts: string[] }) {
-    provider = new ethers.BrowserProvider(wallet.provider);
-    account = wallet.accounts[0];
-  }
 </script>
 
 <h2>Link a transaction to execute</h2>
 
-<Caller provider={ provider } from={ account } address={ address } calldata={ calldata }>
-  <ConnectWallet config={ wcConfig } on:connect="{ (e) => connect(e.detail) }" slot="connect" />
-</Caller>
+<Caller config={ wcConfig } address={ address } calldata={ calldata } />
 
 <style lang="scss">
 </style>
