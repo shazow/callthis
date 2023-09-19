@@ -1,6 +1,8 @@
 <script lang="ts">
   //import { ethers } from "ethers";
   import type { ethers } from "ethers";
+  import { autoload } from "@shazow/whatsabi";
+  import { debouncer } from "$lib/helpers";
 
   export let provider : ethers.BrowserProvider;
 
@@ -17,6 +19,15 @@
 
     provider.call(tx);
   }
+
+  async function handleAddress(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    if (!target.validity.valid) return;
+
+    console.log("Loading ABI for: ", address);
+    const abi = await autoload(address, { provider });
+    console.log("Loaded ABI: ", abi);
+  }
 </script>
 
 <form on:submit|preventDefault="{handleSubmit}">
@@ -27,7 +38,7 @@
 
   <label>
     <span>Address</span>
-    <input type="text" name="address" bind:value={address} required pattern="(0x[a-fA-F0-9]{40})|(\w+\.\w+)" />
+    <input type="text" name="address" on:input={debouncer(handleAddress)} bind:value={address} required pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" />
   </label>
 
   <label>
@@ -40,7 +51,7 @@
   </label>
 
   <label>
-    <input type="submit" value="Execute Transaction" disabled="{ !provider }">
+    <input type="submit" value="Execute Transaction" disabled={ !provider }>
   </label>
 </form>
 
