@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
 
-  import Caller from '$lib/Caller.svelte';
+  import TransactionBuilder from '$lib/TransactionBuilder.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   const wcConfig : Config = {
@@ -18,8 +18,8 @@
     },
   }
 
-  let address : string = $page.url.searchParams.get("address") || "";
-  let calldata : string = $page.url.searchParams.get("calldata") || "";
+  let to : string = $page.url.searchParams.get("to") || "";
+  let calldata : string = $page.url.searchParams.get("data") || "";
   let args : Record<string, string[]> = {
     [calldata.slice(0, 10)]: $page.url.searchParams.getAll("arg")
   };
@@ -28,7 +28,4 @@
 
 <h2>Link a transaction to execute</h2>
 
-<Caller config={ wcConfig } address={ address } calldata={ calldata } args={ args } value={ value }/>
-
-<style lang="scss">
-</style>
+<TransactionBuilder config={ wcConfig } to={ to } calldata={ calldata } args={ args } value={ value }/>

@@ -1,5 +1,5 @@
 <header>
-  <h1>Call This?</h1>
+  <h1>callthis.eth</h1>
 </header>
 
 <main>
@@ -7,5 +7,5 @@
 </main>
 
 <script lang="ts">
-  import "./style.scss";
+  import "../style.scss";
 </script>
