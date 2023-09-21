@@ -14,8 +14,13 @@
 
   export let config : Config;
   export let calldata : string;
+  export let args : Record<string, string[]>;
   export let value : string;
   export let address : string;
+
+  function getArg(index: number) {
+    return args[selectedFunction]?.[index] || "";
+  }
 
   function handleSubmit() {
     if (!provider) return;
@@ -89,9 +94,10 @@
   {/if}
 
   {#if selectedFragment}
-  {#each selectedFragment.inputs as input}
+  {#each selectedFragment.inputs as input, i}
   <label>
-    <span>Input: {input.name} : {input.type}</span>
+    <span>{input.name}</span>
+    <input type="text" value="{getArg(i)}" /> as {input.type}
   </label>
   {/each}
   {/if}

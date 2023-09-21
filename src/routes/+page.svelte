@@ -20,12 +20,15 @@
 
   let address : string = $page.url.searchParams.get("address") || "";
   let calldata : string = $page.url.searchParams.get("calldata") || "";
+  let args : Record<string, string[]> = {
+    [calldata.slice(0, 10)]: $page.url.searchParams.getAll("arg")
+  };
   let value : string = $page.url.searchParams.get("value") || "";
 </script>
 
 <h2>Link a transaction to execute</h2>
 
-<Caller config={ wcConfig } address={ address } calldata={ calldata } value={ value }/>
+<Caller config={ wcConfig } address={ address } calldata={ calldata } args={ args } value={ value }/>
 
 <style lang="scss">
 </style>
