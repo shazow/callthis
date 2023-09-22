@@ -92,7 +92,7 @@
 <form on:submit|preventDefault="{handleSubmit}">
   <label>
     <span>From</span>
-    <input type="text" name="from" bind:value={from} disabled />
+    <ConnectWallet config={ config } on:connect="{ (e) => connect(e.detail) }" />
   </label>
 
   <Address required disabled={ !editing } provider={ provider } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
@@ -103,7 +103,7 @@
     <select bind:value={ selectedFunction } on:change={ updateFunction }>
       <option></option>
       {#each functions as f}
-      <option value={f.selector}>{f.format("full")}</option>
+      <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
       {/each}
     </select>
   </label>
@@ -130,10 +130,6 @@
   </label>
   {/if}
 
-  <p>
-    <ConnectWallet config={ config } on:connect="{ (e) => connect(e.detail) }" />
-  </p>
-
   <label>
     <span>Transaction</span>
     <button on:click={ () => editing = true } disabled={editing}>Edit Transaction</button>
@@ -144,6 +140,6 @@
 
 <style lang="scss">
   form {
-    width: 30rem;
+    max-width: 30rem;
   }
 </style>

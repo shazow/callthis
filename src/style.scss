@@ -55,10 +55,12 @@ label {
 }
 
 input, textarea, select, button {
+  box-sizing: border-box;
   padding: 0.5rem 0.8rem;
   border-radius: 5px;
   border: 2px solid rgba(0, 0, 0, 0.2);
   margin-right: 0.5rem;
+  font-family: monospace;
 
   &[readonly] {
     opacity: 0.8;
@@ -72,12 +74,7 @@ input, textarea, select, button {
   }
 }
 
-input[type=text] {
+input[type=text], textarea, select {
   display: block;
-  width: 100%;
-  font-family: monospace;
-}
-
-textarea, select {
   width: 100%;
 }

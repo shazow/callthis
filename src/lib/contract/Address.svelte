@@ -26,7 +26,7 @@
 </script>
 
   
-<label class="resolved">
+<label>
   <slot>Address</slot>
   <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" disabled={disabled} readonly={readonly} required={required}/>
   {#if resolved && resolved != value}
@@ -44,9 +44,9 @@
 
   input {
     font-size: 1em;
+    font-family: monospace;
     width: 100%;
     line-height: 1.5em;
-    padding: 0.5em 1em;
   }
   .resolved {
     input {
