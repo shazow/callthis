@@ -2,8 +2,8 @@
   import { page } from '$app/stores';
   import { ethers } from "ethers";
   import { autoload } from "@shazow/whatsabi";
-  import { debouncer } from "$lib/helpers";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
+  import Address from '$lib/contract/Address.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   let from : string;
@@ -37,6 +37,8 @@
   }
 
   async function loadAddress() {
+    if (!provider) return;
+
     const r = await autoload(to, {
       provider,
       followProxies: true,
@@ -61,14 +63,6 @@
     from = wallet.accounts[0];
 
     loadAddress();
-  }
-
-  async function handleAddress(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    if (!target.validity.valid) return;
-    if (!provider) return;
-
-    return loadAddress();
   }
 
   function updateLink() {
@@ -101,10 +95,7 @@
     <input type="text" name="from" bind:value={from} disabled />
   </label>
 
-  <label>
-    <span>To</span>
-    <input type="text" name="to" on:input={debouncer(handleAddress)} bind:value={to} required pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" disabled={ !editing }/>
-  </label>
+  <Address required disabled={ !editing } provider={ provider } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
 
   {#if functions}
   <label>

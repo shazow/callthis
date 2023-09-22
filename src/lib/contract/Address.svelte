@@ -1,0 +1,71 @@
+<script lang="ts">
+  import { ethers } from "ethers";
+  import { debouncer } from "$lib/helpers";
+  import { createEventDispatcher } from 'svelte';
+
+  export let provider : ethers.BrowserProvider;
+
+  export let disabled = false;
+  export let readonly = false;
+  export let required = false;
+  export let value = "";
+  export let resolved = "";
+
+  const dispatch = createEventDispatcher();
+
+  async function inputHandler(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (!target.validity.valid) return;
+
+    if (provider) {
+      resolved = await ethers.resolveAddress(value);
+    }
+
+    dispatch("change", {target, value, resolved});
+  }
+</script>
+
+  
+<label class="resolved">
+  <slot>Address</slot>
+  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" disabled={disabled} readonly={readonly} required={required}/>
+  {#if resolved && resolved != value}
+  <aside>
+    {resolved}
+  </aside>
+  {/if}
+</label>
+
+<style lang="scss">
+  :root {
+    --resolved-color: rgb(120, 230, 150);
+    --resolved-border: 2px solid var(--resolved-color);
+  }
+
+  input {
+    font-size: 1em;
+    width: 100%;
+    line-height: 1.5em;
+    padding: 0.5em 1em;
+  }
+  .resolved {
+    input {
+      border-radius: 5px 5px 0 0;
+      border-bottom: 0;
+    }
+
+    aside {
+      font-size: 1em;
+      width: 100%;
+      font-family: monospace;
+      background: var(--resolved-color);
+      color: rgba(0, 0, 0, 0.6);
+      font-weight: bold;
+      line-height: 1.5em;
+      padding: 0.5em 1em;
+      border-radius: 0px 0px 5px 5px;
+      border-left: var(--resolved-border);
+      border-right: var(--resolved-border);
+    }
+  }
+</style>
