@@ -61,6 +61,7 @@ input, textarea, select, button {
   border: 2px solid rgba(0, 0, 0, 0.2);
   margin-right: 0.5rem;
   font-family: monospace;
+  margin-bottom: 1em;
 
   &[readonly] {
     opacity: 0.8;
