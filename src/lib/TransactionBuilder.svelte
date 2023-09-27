@@ -133,7 +133,7 @@
   <label>
     <span>Transaction</span>
     <button on:click={ () => editing = true } disabled={editing}>Edit Transaction</button>
-    <button on:click={ updateLink }>Update Link</button>
+    <button on:click={ updateLink } disabled={!editing} >Update Link</button>
     <input type="submit" value="Simulate & Execute" disabled={ !provider }>
   </label>
 </form>

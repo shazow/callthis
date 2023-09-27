@@ -14,11 +14,12 @@
   const dispatch = createEventDispatcher();
 
   async function inputHandler(event: Event) {
+    resolved = "";
     const target = event.target as HTMLInputElement;
     if (!target.validity.valid) return;
 
     if (provider) {
-      resolved = await ethers.resolveAddress(value);
+      resolved = await ethers.resolveAddress(value, provider);
     }
 
     dispatch("change", {target, value, resolved});
@@ -26,7 +27,7 @@
 </script>
 
   
-<label>
+<label class:resolved={ resolved && resolved != value }>
   <slot>Address</slot>
   <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" disabled={disabled} readonly={readonly} required={required}/>
   {#if resolved && resolved != value}
@@ -38,8 +39,9 @@
 
 <style lang="scss">
   :root {
-    --resolved-color: rgb(120, 230, 150);
-    --resolved-border: 2px solid var(--resolved-color);
+    --resolved-color: rgb(255, 255, 255);
+    --resolved-background: rgb(85, 170, 95);
+    --resolved-border: 2px solid var(--resolved-background);
   }
 
   input {
@@ -50,16 +52,18 @@
   }
   .resolved {
     input {
+      margin-bottom: 0;
       border-radius: 5px 5px 0 0;
       border-bottom: 0;
     }
 
     aside {
+      box-sizing: border-box;
       font-size: 1em;
       width: 100%;
       font-family: monospace;
-      background: var(--resolved-color);
-      color: rgba(0, 0, 0, 0.6);
+      background: var(--resolved-background);
+      color: var(--resolved-color);
       font-weight: bold;
       line-height: 1.5em;
       padding: 0.5em 1em;
