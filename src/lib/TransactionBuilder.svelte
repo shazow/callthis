@@ -24,7 +24,7 @@
     return args[selectedFunction]?.[index] || "";
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!provider) return;
 
     const tx = {
@@ -33,7 +33,7 @@
       data: calldata,
     };
 
-    provider.call(tx);
+    console.log(await provider.estimateGas(tx));
   }
 
   async function loadAddress() {
@@ -100,7 +100,7 @@
   {#if functions}
   <label>
     <span>Function</span>
-    <select bind:value={ selectedFunction } on:change={ updateFunction }>
+    <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
       <option></option>
       {#each functions as f}
       <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
