@@ -150,6 +150,10 @@ export async function connect() {
   const provider = await EthereumProvider.init(config as EthereumProviderOptions);
 
   provider.on("connect", () => {
+    if (!provider) {
+      console.error("EthereumProvider:connect", "missing provider", arguments);
+      return;
+    }
     accounts = provider.accounts;
     dispatch("connect", {provider, accounts});
   });

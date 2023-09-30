@@ -1,18 +1,24 @@
 <script lang="ts">
   import { page } from '$app/stores';
+
   import { ethers } from "ethers";
+  import { createWalletClient, custom } from 'viem';
+  import type { WalletClient } from 'viem';
+
   import { autoload } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
   import Address from '$lib/contract/Address.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   let from : string;
-  let provider : ethers.BrowserProvider;
+  let provider : WalletClient;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
   let editing = false;
+
+  type HexString = `0x{string}`;
 
   export let config : Config;
   export let calldata : string;
@@ -28,12 +34,15 @@
     if (!provider) return;
 
     const tx = {
-      from: from,
+      account: from,
       to: to,
-      data: calldata,
+      data: calldata as HexString,
+      value: value && BigInt(value) || 0n,
+      chain: null,
     };
 
-    console.log(await provider.estimateGas(tx));
+    const prepared = await provider.prepareTransactionRequest(tx);
+    console.log(prepared);
   }
 
   async function loadAddress() {
@@ -59,7 +68,7 @@
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
-    provider = new ethers.BrowserProvider(wallet.provider);
+    provider = createWalletClient({ transport: custom(provider) });
     from = wallet.accounts[0];
 
     loadAddress();
