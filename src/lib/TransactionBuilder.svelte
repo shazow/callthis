@@ -13,12 +13,23 @@
   export let to : string;
 
   let from : string;
+  let toResolved : string;
+  let toMethods : {
+    resolve(target:any): Promise<string>,
+  };
   let provider : ethers.BrowserProvider;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
   let editing = to === "";
+  let result : { status: "error"|"success", message:string} | null = null;
+
+  function resolver(value: string): Promise<string> {
+    const r = ethers.resolveAddress(value, provider);
+    if (r instanceof Promise) return r;
+    return Promise.resolve(r);
+  };
 
   function getArg(index: number) {
     return args[selectedFunction]?.[index] || "";
@@ -29,15 +40,18 @@
 
     const tx = {
       from: from,
-      to: to,
+      to: toResolved,
       data: calldata,
     };
+
+    if (!tx.to) throw new Error("Missing resolved target address");
 
     console.log(await provider.estimateGas(tx));
   }
 
-  async function loadAddress() {
+  async function loadAddress(event?: CustomEvent) {
     if (!provider) return;
+    if (event) toResolved = event.detail.resolved;
 
     const r = await autoload(to, {
       provider,
@@ -62,7 +76,7 @@
     provider = new ethers.BrowserProvider(wallet.provider);
     from = wallet.accounts[0];
 
-    loadAddress();
+    toMethods.resolve("connect");
   }
 
   function updateLink() {
@@ -95,7 +109,7 @@
     <ConnectWallet config={ config } on:connect="{ (e) => connect(e.detail) }" />
   </label>
 
-  <Address required disabled={ !editing } provider={ provider } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
+  <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
 
   {#if functions}
   <label>
@@ -143,6 +157,12 @@
   </label>
 </form>
 
+{#if result}
+<div class="result">
+${result.message}
+</div>
+{/if}
+
 <style lang="scss">
   form {
     max-width: 30rem;
@@ -151,5 +171,9 @@
   label.input {
     padding-left: 1rem;
     border-left: 0.5rem solid rgba(35,80,180,0.3);
+  }
+
+  .result {
+    font-family: monospace;
   }
 </style>

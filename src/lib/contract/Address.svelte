@@ -1,15 +1,28 @@
 <script lang="ts">
-  import { ethers } from "ethers";
   import { debouncer } from "$lib/helpers";
   import { createEventDispatcher } from 'svelte';
 
-  export let provider : ethers.BrowserProvider;
+  //$$restProps; // Workaround for https://github.com/sveltejs/svelte/issues/4652
 
+  type Resolver = (addr: string) => Promise<string>;
+
+  export let resolver : Resolver = (_: string) => Promise.resolve("");
   export let disabled = false;
   export let readonly = false;
   export let required = false;
   export let value = "";
   export let resolved = "";
+  export const methods = {
+    async resolve(target:any): Promise<string> {
+      resolved = await resolver(value);
+      if (was === resolved) return resolved;
+      was = resolved;
+      dispatch("change", {target, value, resolved});
+      return resolved;
+    },
+  }
+
+  let was = "";
 
   const dispatch = createEventDispatcher();
 
@@ -17,23 +30,18 @@
     resolved = "";
     const target = event.target as HTMLInputElement;
     if (!target.validity.valid) return;
-
-    if (provider) {
-      resolved = await ethers.resolveAddress(value, provider);
-    }
-
-    dispatch("change", {target, value, resolved});
+    return methods.resolve(target);
   }
 </script>
 
-  
 <label class:resolved={ resolved && resolved != value }>
   <slot>Address</slot>
-  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)"} disabled={disabled} readonly={readonly} required={required}/>
+  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"} disabled={disabled} readonly={readonly} required={required}/>
   {#if resolved && resolved != value}
-  <aside>
-    {resolved}
-  </aside>
+  <details>
+    <summary>{resolved}</summary>
+    <!-- TODO: Add details like recent events -->
+  </details>
   {/if}
 </label>
 
@@ -57,7 +65,7 @@
       border-bottom: 0;
     }
 
-    aside {
+    details {
       box-sizing: border-box;
       font-size: 1em;
       width: 100%;
