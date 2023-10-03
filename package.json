@@ -23,7 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@shazow/whatsabi": "^0.8.5",
+		"@shazow/whatsabi": "link:../whatsabi",
 		"@walletconnect/ethereum-provider": "^2.10.1",
 		"@walletconnect/modal": "^2.6.2",
 		"ethers": "^6.7.1"

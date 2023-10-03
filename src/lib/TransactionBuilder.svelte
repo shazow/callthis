@@ -23,7 +23,7 @@
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
   let editing = to === "";
-  let result : { status: "error"|"success", message:string} | null = null;
+  let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
 
   function resolver(value: string): Promise<string> {
     const r = ethers.resolveAddress(value, provider);
@@ -46,7 +46,18 @@
 
     if (!tx.to) throw new Error("Missing resolved target address");
 
-    console.log(await provider.estimateGas(tx));
+    try {
+      result = {
+        status: "ok",
+        value: await provider.call(tx),
+      }
+      console.log("Loaded result:", result);
+    } catch (e) {
+      result = {
+        status: "error",
+        message: (e as Error).message,
+      };
+    }
   }
 
   async function loadAddress(event?: CustomEvent) {
@@ -153,15 +164,19 @@
     <span>Transaction</span>
     <button on:click={ () => editing = true } disabled={editing}>Edit Transaction</button>
     <button on:click={ updateLink } disabled={!editing} >Update Link</button>
-    <input type="submit" value="Simulate & Execute" disabled={ !provider }>
+    <input type="submit" value="Simulate & Execute" disabled={ !provider || toResolved === "" }>
   </label>
-</form>
 
-{#if result}
-<div class="result">
-${result.message}
-</div>
-{/if}
+  {#if result}
+  <label>
+    <span>Result</span>
+    <div class="result {result.status}">
+      {result.value || result.message}
+    </div>
+  </label>
+  {/if}
+
+</form>
 
 <style lang="scss">
   form {
@@ -174,6 +189,20 @@ ${result.message}
   }
 
   .result {
+    width: 100%;
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.9);
     font-family: monospace;
+    font-weight: bold;
+    padding: 0.5rem 0.5rem;
+
+    &.ok {
+      word-break: break-all;
+      background: rgba(85, 170, 95);
+      font-size: 1.2rem;
+    }
+    &.error {
+      background: rgba(170, 85, 95);
+    }
   }
 </style>
