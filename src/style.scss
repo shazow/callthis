@@ -41,10 +41,16 @@ main {
 }
 
 label {
-  display: block;
+  position: relative;
+  display: flex;
+  flex-flow: wrap;
+  justify-content: space-between;
+  column-gap: 0.5rem;
+  align-content: stretch;
   margin-bottom: 1rem;
 
-  span {
+  span, aside {
+    flex-basis: 100%;
     color: rgba(0, 0, 0, 0.6);
     font-weight: bold;
     font-size: 0.8rem;
@@ -52,6 +58,15 @@ label {
     display: block;
     line-height: 1.5em;
   }
+
+  aside {
+    position: absolute;
+    right: 0;
+  }
+}
+
+button, input[type="text"] {
+  flex-grow: 1;
 }
 
 input, textarea, select, button {
@@ -59,7 +74,6 @@ input, textarea, select, button {
   padding: 0.5rem 0.8rem;
   border-radius: 5px;
   border: 2px solid rgba(0, 0, 0, 0.2);
-  margin-right: 0.5rem;
   font-family: monospace;
   margin-bottom: 1em;
 
@@ -78,4 +92,5 @@ input, textarea, select, button {
 input[type=text], textarea, select {
   display: block;
   width: 100%;
+  margin-bottom: 0;
 }

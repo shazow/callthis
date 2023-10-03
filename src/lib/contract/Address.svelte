@@ -29,7 +29,7 @@
   
 <label class:resolved={ resolved && resolved != value }>
   <slot>Address</slot>
-  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern="(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)" disabled={disabled} readonly={readonly} required={required}/>
+  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\w+\.)+\w+)"} disabled={disabled} readonly={readonly} required={required}/>
   {#if resolved && resolved != value}
   <aside>
     {resolved}

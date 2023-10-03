@@ -6,19 +6,19 @@
   import Address from '$lib/contract/Address.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
+  export let config : Config;
+  export let calldata : string;
+  export let args : Record<string, string[]>;
+  export let value : string;
+  export let to : string;
+
   let from : string;
   let provider : ethers.BrowserProvider;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
-  let editing = false;
-
-  export let config : Config;
-  export let calldata : string;
-  export let args : Record<string, string[]>;
-  export let value : string;
-  export let to : string;
+  let editing = to === "";
 
   function getArg(index: number) {
     return args[selectedFunction]?.[index] || "";
@@ -70,7 +70,7 @@
       data: calldata,
       to: to,
       value: value,
-      hint: selectedFragment?.format("minimal"),
+      hint: selectedFragment?.format("sighash"),
     }
 
     console.log("Updating state:", state);
@@ -111,9 +111,14 @@
 
   {#if selectedFragment}
   {#each selectedFragment.inputs as input, i}
-  <label>
+  <label class="input">
+    {#if input.baseType === "tuple" || input.baseType === "array" }
+    <input type="text" placeholder="Unsupported type: {input.type}" disabled />
+    {:else}
     <span>{input.name}</span>
-    <input type="text" value="{getArg(i)}" /> as {input.type}
+    <input type="text" value="{getArg(i)}" />
+    <aside>{input.type}</aside>
+    {/if}
   </label>
   {/each}
   {/if}
@@ -141,5 +146,10 @@
 <style lang="scss">
   form {
     max-width: 30rem;
+  }
+
+  label.input {
+    padding-left: 1rem;
+    border-left: 0.5rem solid rgba(35,80,180,0.3);
   }
 </style>
