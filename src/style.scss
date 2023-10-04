@@ -61,7 +61,7 @@ label {
 
   aside {
     position: absolute;
-    right: 0;
+    right: 5px;
   }
 }
 
@@ -75,7 +75,6 @@ input, textarea, select, button {
   border-radius: 5px;
   border: 2px solid rgba(0, 0, 0, 0.2);
   font-family: monospace;
-  margin-bottom: 1em;
 
   &[readonly] {
     opacity: 0.8;

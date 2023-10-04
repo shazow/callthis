@@ -55,7 +55,7 @@
     } catch (e) {
       result = {
         status: "error",
-        message: (e as Error).message,
+        message: "Error: "+ (e as Error).message,
       };
     }
   }
@@ -160,6 +160,39 @@
   </label>
   {/if}
 
+  <quote>
+    {#if selectedFragment}
+    Call <code>{selectedFragment.format("sighash")}</code>
+      {#if toResolved}
+      on contract at <code>{toResolved}</code>
+      {:else if to}
+      on contract at <code>{to}</code>
+      {:else}
+      ...
+      {/if}
+      {#if value}
+      with <code>{value} ether</code>
+      {/if}
+    {:else if value}
+    Send <code>{value} ether</code>
+      {#if toResolved}
+      to <code>{toResolved}</code>
+      {:else if to}
+      to <code>{to}</code>
+      {:else}
+      ...
+      {/if}
+    {:else if to}
+    Call contract at
+      {#if toResolved}
+      <code>{toResolved}</code>
+      {:else}
+      <code>{to}</code>
+      {/if}
+      without any data
+    {/if}
+  </quote>
+
   <label>
     <span>Transaction</span>
     <button on:click={ () => editing = true } disabled={editing}>Edit Transaction</button>
@@ -203,6 +236,27 @@
     }
     &.error {
       background: rgba(170, 85, 95);
+    }
+  }
+
+  quote {
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    border-left: 5px solid rgba(255, 160, 70, 0.8);
+    border-radius: 5px;
+    background: rgba(255, 160, 70, 0.1);
+    padding: 0.3em 0.5em;
+    line-height: 1.7em;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1em;
+
+    code {
+      background: rgba(255, 210, 70, 0.6);
+      font-weight: bold;
+      padding: 0.1em 0.3em;
+      color: rgba(105, 95, 25, 0.8);
+      border-radius: 3px;
     }
   }
 </style>
