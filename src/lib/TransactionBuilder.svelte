@@ -201,7 +201,7 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ () => { editing = false }}>Update Link</button>
+    <button on:click|preventDefault={ () => { updateLink() }}>Save Transaction</button>
     {:else}
     <button on:click|preventDefault={ () => { editing = true }}>Edit Transaction</button>
     {/if}
