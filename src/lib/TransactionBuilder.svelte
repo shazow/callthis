@@ -22,8 +22,10 @@
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
-  let editing = to === "";
+  let editing : boolean;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
+
+  editing = (to === "");
 
   function resolver(value: string): Promise<string> {
     const r = ethers.resolveAddress(value, provider);
@@ -148,18 +150,21 @@
   {/each}
   {/if}
 
+  {#if calldata || editing}
   <label>
     <span>Calldata</span>
     <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
   </label>
+  {/if}
 
   {#if value || editing}
   <label>
     <span>Value</span>
-    <input type="text" name="value" bind:value={value} placeholder="0" />
+    <input type="text" name="value" bind:value={value} placeholder="0" disabled={ !editing }/>
   </label>
   {/if}
 
+  <!-- TODO: Move to a TransactionSummary component -->
   <quote>
     {#if selectedFragment}
     Call <code>{selectedFragment.format("sighash")}</code>
@@ -195,8 +200,11 @@
 
   <label>
     <span>Transaction</span>
-    <button on:click={ () => editing = true } disabled={editing}>Edit Transaction</button>
-    <button on:click={ updateLink } disabled={!editing} >Update Link</button>
+    {#if editing}
+    <button on:click|preventDefault={ () => { editing = false }}>Update Link</button>
+    {:else}
+    <button on:click|preventDefault={ () => { editing = true }}>Edit Transaction</button>
+    {/if}
     <input type="submit" value="Simulate & Execute" disabled={ !provider || toResolved === "" }>
   </label>
 
