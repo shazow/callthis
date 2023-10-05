@@ -165,7 +165,7 @@
 </script>
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}">
-  <label>
+  <label for={undefined}>
     <span>From</span>
     <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }" />
   </label>
@@ -225,7 +225,7 @@
   </label>
 
   {#if result}
-  <label>
+  <label for={undefined}>
     <span>Result</span>
     <div class="result {result.status}">
       {result.value || result.message}
