@@ -1,12 +1,10 @@
 <script lang="ts">
   import { debouncer } from "$lib/helpers";
-  import { createEventDispatcher } from 'svelte';
-
-  //$$restProps; // Workaround for https://github.com/sveltejs/svelte/issues/4652
+  import { createEventDispatcher } from "svelte";
 
   type Resolver = (addr: string) => Promise<string>;
 
-  export let resolver : Resolver = (_: string) => Promise.resolve("");
+  export let resolver: Resolver = (_: string) => Promise.resolve("");
   export let disabled = false;
   export let readonly = false;
   export let required = false;
@@ -14,17 +12,24 @@
   export let value = "";
   export let resolved = "";
   export const methods = {
-    async resolve(target:any): Promise<string> {
-      resolved = await resolver(value);
+    async resolve(target: any): Promise<string> {
+      error = "";
+      try {
+        resolved = await resolver(value);
+      } catch (err) {
+        error = "Failed to resolve";
+        throw err;
+      }
       if (was === resolved) return resolved;
       was = resolved;
-      dispatch("change", {target, value, resolved});
+      dispatch("change", { target, value, resolved });
       return resolved;
     },
-  }
+  };
 
-  let el : HTMLInputElement;
+  let el: HTMLInputElement;
   let was = "";
+  let error = "";
 
   const dispatch = createEventDispatcher();
 
@@ -36,21 +41,37 @@
   }
 </script>
 
-<label class:resolved={ resolved && resolved != value }>
+<label class:resolved={resolved && resolved != value}>
   <slot>Address</slot>
-  <input type="text" name={name} bind:this={el} on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"} disabled={disabled} readonly={readonly} required={required}/>
+  <input
+    type="text"
+    bind:this={el}
+    on:input={debouncer(inputHandler)}
+    bind:value
+    pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"}
+    placeholder="Address"
+    {name}
+    {disabled}
+    {readonly}
+    {required}
+  />
   {#if resolved && resolved != value}
-  <details>
-    <summary>{resolved}</summary>
-    <!-- TODO: Add details like recent events -->
-  </details>
+    <details>
+      <summary>{resolved}</summary>
+      <!-- TODO: Add details like recent events -->
+      <p>Account details and recent history will go here someday, check back later. :)</p>
+    </details>
   {/if}
   {#if el?.validationMessage}
     {#if el.validity.patternMismatch}
-  <span class="invalid">Must be a valid hex or ENS address</span>
+      <div class="invalid">Must be a valid ENS or hex address</div>
+    {:else if el.validity.valueMissing}
     {:else}
-  <span class="invalid">{el.validationMessage}</span>
+      <div class="invalid">{el.validationMessage}</div>
     {/if}
+  {/if}
+  {#if error}
+    <div class="error">{error}</div>
   {/if}
 </label>
 
@@ -83,7 +104,7 @@
       color: var(--resolved-color);
       font-weight: bold;
       line-height: 1.5em;
-      padding: 0.5em 1em;
+      padding: 0.5em 0;
       border-radius: 0px 0px 5px 5px;
       border-left: var(--resolved-border);
       border-right: var(--resolved-border);

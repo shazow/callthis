@@ -29,10 +29,27 @@
   let selectedFragment : ethers.FunctionFragment | undefined;
   let editing : boolean;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
+  let form : HTMLFormElement;
 
   editing = (to === "");
 
+  const log = {
+    error(err: Error|string) {
+      const msg = err instanceof Error ? err.message : err;
+      result = {
+        status: "error",
+        message: "Error: "+ msg,
+      };
+      console.error(err);
+    },
+
+    info(...args: any[]) {
+      console.log(...args)
+    }
+  };
+
   function resolver(value: string): Promise<string> {
+    log.info(`Resolving address: ${value}`);
     const r = ethers.resolveAddress(value, provider);
     if (r instanceof Promise) return r;
     return Promise.resolve(r);
@@ -45,13 +62,21 @@
   async function handleSubmit() {
     if (!provider) return;
 
+    if (!toResolved) {
+      log.error("Transaction 'to' field is not resolved");
+      await toMethods.resolve("submit");
+    }
+
     const tx = {
       from: from,
       to: toResolved,
       data: calldata,
     };
 
-    if (!tx.to) throw new Error("Missing resolved target address");
+    if (!tx.to) {
+      // TODO: We can remove this check once ethers.js v6 bug is fixed?
+      return log.error("Failed resolving 'to' address");
+    }
 
     try {
       result = {
@@ -59,12 +84,7 @@
         value: await provider.call(tx),
       }
       console.log("Loaded result:", result);
-    } catch (e) {
-      result = {
-        status: "error",
-        message: "Error: "+ (e as Error).message,
-      };
-    }
+    } catch(err) { return log.error(err as Error); }
   }
 
   async function loadAddress(event?: CustomEvent) {
@@ -74,9 +94,10 @@
     const r = await autoload(to, {
       provider,
       followProxies: true,
-      onProgress: (progress, ...args: any[]) => console.log("WhatsABI: ", progress, args),
+      onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
     });
-    console.log("Loaded ABI: ", r);
+
+    log.info(`Loaded ABI: ${r.abi?.length} items from ${r.address}`)
 
     selectedFunction = calldata.slice(0, 10);
     abi = ethers.Interface.from(r.abi);
@@ -94,10 +115,16 @@
     provider = new ethers.BrowserProvider(wallet.provider);
     from = wallet.accounts[0];
 
-    toMethods.resolve("connect");
+    log.info(`Connected wallet: ${from}`);
+    if (to) toMethods.resolve("connect");
   }
 
   function updateLink() {
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     let state : Record<string, string|undefined> = {
       data: calldata,
       to: to,
@@ -123,7 +150,7 @@
   }
 </script>
 
-<form on:submit|preventDefault="{handleSubmit}">
+<form bind:this={form} on:submit|preventDefault="{handleSubmit}">
   <label>
     <span>From</span>
     <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }" />
@@ -173,7 +200,7 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ () => { updateLink() }}>💾 Save Transaction</button>
+    <button on:click|preventDefault={ updateLink } >💾 Save Transaction</button>
     {:else}
     <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit Transaction</button>
     {/if}

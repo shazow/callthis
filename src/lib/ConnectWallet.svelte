@@ -96,6 +96,7 @@
   }
 </script>
 
+<div class="connect-wallet">
 {#if accounts.length === 0}
   <button on:click={connect}>
     <slot name="connect-label">Connect Wallet</slot>
@@ -103,23 +104,7 @@
 
   {#if loading}
     <slot name="loading">
-      <svg
-        class="loading"
-        width="1rem"
-        height="1rem"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        ><path
-          d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
-          ><animateTransform
-            attributeName="transform"
-            type="rotate"
-            dur="0.75s"
-            values="0 12 12;360 12 12"
-            repeatCount="indefinite"
-          /></path
-        ></svg
-      >
+      <svg class="loading" width="1rem" height="1rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" ><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></svg>
     </slot>
   {/if}
 {:else}
@@ -130,6 +115,7 @@
     </dl>
   </slot>
 {/if}
+</div>
 
 <style lang="scss">
   :root {
@@ -145,6 +131,10 @@
       rgba(0, 140, 20, 0.6)
     );
     --connected-border: none;
+  }
+  .connect-wallet {
+    display: inherit;
+    text-transform: initial;
   }
   button {
     display: inline-block;
@@ -169,6 +159,7 @@
     margin: 0.5rem;
   }
   dl {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     font-weight: bold;
@@ -183,12 +174,12 @@
     display: inline-block;
     padding: 0.5rem 0.8rem;
     margin: 0;
+    font-size: 1rem;
   }
   dd {
     flex-grow: 1;
     background: rgba(0, 100, 0, 0.2);
     border-left: var(--connected-border);
     font-family: monospace;
-    font-size: 1rem;
   }
 </style>

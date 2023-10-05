@@ -33,8 +33,9 @@ header {
   color: var(--header-color);
   border-bottom: var(--header-border-bottom);
 
-  a {
+  a, a:hover {
     text-decoration: none;
+    color: var(--header-color);
   }
 }
 
@@ -62,7 +63,7 @@ label {
   align-content: stretch;
   margin-bottom: 1rem;
 
-  span, aside {
+  div, span, aside {
     flex-basis: 100%;
     color: rgba(0, 0, 0, 0.6);
     font-weight: bold;
@@ -77,7 +78,7 @@ label {
     right: 5px;
   }
 
-  .invalid {
+  .invalid, .error {
     text-align: center;
     color: rgba(200, 30, 30, 0.8);
   }
@@ -102,7 +103,7 @@ input, textarea, select, button {
   }
 
   &:invalid {
-    border-color: rgba(100, 0, 0, 0.6);
+    border-color: rgba(200, 30, 30, 0.6);
   }
 }
 
