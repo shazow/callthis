@@ -79,7 +79,7 @@
       from: from,
       to: toResolved,
       data: calldata,
-      value: ethers.parseEther(value),
+      value: value && ethers.parseEther(value) || null,
     };
 
     if (!tx.to) {
