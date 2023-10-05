@@ -108,6 +108,10 @@
       border-radius: 0px 0px 5px 5px;
       border-left: var(--resolved-border);
       border-right: var(--resolved-border);
+
+      p {
+        margin: 1em;
+      }
     }
   }
 </style>

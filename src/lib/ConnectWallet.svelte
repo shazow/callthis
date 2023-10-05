@@ -174,7 +174,7 @@
     display: inline-block;
     padding: 0.5rem 0.8rem;
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1em;
   }
   dd {
     flex-grow: 1;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { ethers } from "ethers";
   import { autoload } from "@shazow/whatsabi";
@@ -27,11 +28,14 @@
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
-  let editing : boolean;
+  let editing : boolean = (to === "");
+  let submitting = false;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
   let form : HTMLFormElement;
 
-  editing = (to === "");
+  onMount(() => {
+    if (provider) toMethods.resolve("mount");
+  });
 
   const log = {
     error(err: Error|string) {
@@ -60,10 +64,14 @@
   }
 
   async function handleSubmit() {
-    if (!provider) return;
+    log.info("Submitting transaction");
+
+    if (!provider) {
+      return log.error("Wallet provider not available");
+    }
 
     if (!toResolved) {
-      log.error("Transaction 'to' field is not resolved");
+      log.info("Transaction 'to' field is not resolved");
       await toMethods.resolve("submit");
     }
 
@@ -71,6 +79,7 @@
       from: from,
       to: toResolved,
       data: calldata,
+      value: ethers.parseEther(value),
     };
 
     if (!tx.to) {
@@ -78,13 +87,18 @@
       return log.error("Failed resolving 'to' address");
     }
 
+    submitting = true;
     try {
       result = {
         status: "ok",
         value: await provider.call(tx),
       }
-      console.log("Loaded result:", result);
-    } catch(err) { return log.error(err as Error); }
+      log.info("Loaded result", result);
+    } catch(err) {
+      return log.error(err as Error);
+    } finally {
+      submitting = false;
+    }
   }
 
   async function loadAddress(event?: CustomEvent) {
@@ -200,9 +214,9 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ updateLink } >💾 Save Transaction</button>
+    <button on:click|preventDefault={ updateLink } >💾 Save</button>
     {:else}
-    <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit Transaction</button>
+    <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit</button>
     {/if}
     {#if !provider}
     <button on:click|preventDefault={ connectMethods.connect } >⛓️ Connect Wallet</button>
