@@ -103,7 +103,7 @@
       background: var(--resolved-background);
       color: var(--resolved-color);
       font-weight: bold;
-      line-height: 1.5em;
+      line-height: 1.7em;
       padding: 0.5em 0;
       border-radius: 0px 0px 5px 5px;
       border-left: var(--resolved-border);

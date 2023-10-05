@@ -18,12 +18,27 @@
     },
   }
 
-  let to : string = $page.url.searchParams.get("to") || "";
-  let calldata : string = $page.url.searchParams.get("data") || "";
-  let args : Record<string, string[]> = {
-    [calldata.slice(0, 10)]: $page.url.searchParams.getAll("arg")
-  };
-  let value : string = $page.url.searchParams.get("value") || "";
+  function getParams(p : URLSearchParams) {
+    const to = p.get("to") || "";
+    const calldata = p.get("data") || "";
+    const args = {
+      [calldata.slice(0, 10)]: p.getAll("arg")
+    };
+    const value = p.get("value") || "";
+    return {
+      to, calldata, args, value
+    }
+  }
+
+  $: params = getParams($page.url.searchParams);
 </script>
 
-<TransactionBuilder config={ wcConfig } to={ to } calldata={ calldata } args={ args } value={ value }/>
+<TransactionBuilder config={ wcConfig } to={ params.to } calldata={ params.calldata } args={ params.args } value={ params.value }/>
+
+{#if !params.to}
+<section class="example">
+  <p>
+    <strong>Example:</strong> <a href="/?to=shazow.eth&value=0.1">Send 0.1 ETH to shazow.eth</a> 🥹
+  </p>
+</section>
+{/if}

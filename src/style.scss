@@ -2,6 +2,9 @@
   --header-background: rgb(255, 200, 80);
   --header-color: rgba(200,130,0,0.8);
   --header-border-bottom: 3px solid rgba(200,130,0,0.3);
+
+  --link-color: var(--header-color);
+  --link-color-hover: var(--link-color);
 }
 
 
@@ -9,14 +12,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: rgb(42,42,42);
 }
 
 a {
-  color: #42b983;
+  color: var(--link-color);
   cursor: pointer;
 
   &:hover {
-    color: #5742b9;
+    color: var(--link-color-hover);
   } 
 }
 
@@ -119,4 +123,16 @@ form {
   background: rgb(255, 255, 255);
   padding: 0.5rem 0.8rem;
   border-radius: 5px;
+}
+
+.example {
+  text-align: center;
+
+  p {
+    border-radius: 5em;
+    display: inline-block;
+    font-weight: bold;
+    padding: 1em 1.5em;
+    background: rgba(255, 200, 80, 0.5);
+  }
 }
