@@ -1,3 +1,10 @@
+:root {
+  --header-background: rgb(255, 200, 80);
+  --header-color: rgba(200,130,0,0.8);
+  --header-border-bottom: 3px solid rgba(200,130,0,0.3);
+}
+
+
 body {
   margin: 0;
   padding: 0;
@@ -22,14 +29,19 @@ header {
   margin: 0;
 
   font-weight: bold;
-  background-color: rgb(0, 0, 0, 0.8);
-  color: rgba(255,255,255,0.5);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 1);
+  background: var(--header-background);
+  color: var(--header-color);
+  border-bottom: var(--header-border-bottom);
+
+  a {
+    text-decoration: none;
+  }
 }
 
 header h1 {
   font-family: monospace;
-  font-size: 1.5rem;
+  letter-spacing: 5px;
+  line-height: 1em;
 }
 
 h2 {
@@ -37,7 +49,8 @@ h2 {
 }
 
 main {
-    margin: 20px;
+    margin: 20px auto;
+    max-width: 34rem;
 }
 
 label {
@@ -97,4 +110,11 @@ input[type=text], textarea, select {
   display: block;
   width: 100%;
   margin-bottom: 0;
+}
+
+form {
+  margin: 2rem 0;
+  background: rgb(255, 255, 255);
+  padding: 0.5rem 0.8rem;
+  border-radius: 5px;
 }

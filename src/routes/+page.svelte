@@ -26,6 +26,4 @@
   let value : string = $page.url.searchParams.get("value") || "";
 </script>
 
-<h2>Link a transaction to execute</h2>
-
 <TransactionBuilder config={ wcConfig } to={ to } calldata={ calldata } args={ args } value={ value }/>

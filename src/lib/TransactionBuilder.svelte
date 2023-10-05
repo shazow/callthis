@@ -19,6 +19,9 @@
   let toMethods : {
     resolve(target:any): Promise<string>,
   };
+  let connectMethods : {
+    connect(): Promise<void>;
+  };
   let provider : ethers.BrowserProvider;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
@@ -102,11 +105,13 @@
       hint: selectedFragment?.format("sighash"),
     }
 
-    console.log("Updating state:", state);
+    // Clear unset keys
+    for (const key of $page.url.searchParams.keys()) {
+      if (!state[key]) $page.url.searchParams.delete(key);
+    };
 
     for (const [k, v] of Object.entries(state)) {
       if (!v) {
-        $page.url.searchParams.delete(k);
         continue;
       }
       $page.url.searchParams.set(k, v);
@@ -121,7 +126,7 @@
 <form on:submit|preventDefault="{handleSubmit}">
   <label>
     <span>From</span>
-    <ConnectWallet config={ config } on:connect="{ (e) => connect(e.detail) }" />
+    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }" />
   </label>
 
   <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
@@ -168,11 +173,14 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ () => { updateLink() }}>Save Transaction</button>
+    <button on:click|preventDefault={ () => { updateLink() }}>💾 Save Transaction</button>
     {:else}
-    <button on:click|preventDefault={ () => { editing = true }}>Edit Transaction</button>
+    <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit Transaction</button>
     {/if}
-    <input type="submit" value="Simulate & Execute" disabled={ !provider || toResolved === "" }>
+    {#if !provider}
+    <button on:click|preventDefault={ connectMethods.connect } >⛓️ Connect Wallet</button>
+    {/if}
+    <input type="submit" value="☎️ Execute" disabled={ !provider || toResolved === "" }>
   </label>
 
   {#if result}
@@ -187,10 +195,6 @@
 </form>
 
 <style lang="scss">
-  form {
-    max-width: 30rem;
-  }
-
   label.input {
     padding-left: 1rem;
     border-left: 0.5rem solid rgba(35,80,180,0.3);
