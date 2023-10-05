@@ -10,6 +10,7 @@
   export let disabled = false;
   export let readonly = false;
   export let required = false;
+  export let name = "";
   export let value = "";
   export let resolved = "";
   export const methods = {
@@ -22,6 +23,7 @@
     },
   }
 
+  let el : HTMLInputElement;
   let was = "";
 
   const dispatch = createEventDispatcher();
@@ -36,12 +38,19 @@
 
 <label class:resolved={ resolved && resolved != value }>
   <slot>Address</slot>
-  <input type="text" on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"} disabled={disabled} readonly={readonly} required={required}/>
+  <input type="text" name={name} bind:this={el} on:input={debouncer(inputHandler)} bind:value={value} pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"} disabled={disabled} readonly={readonly} required={required}/>
   {#if resolved && resolved != value}
   <details>
     <summary>{resolved}</summary>
     <!-- TODO: Add details like recent events -->
   </details>
+  {/if}
+  {#if el?.validationMessage}
+    {#if el.validity.patternMismatch}
+  <span class="invalid">Must be a valid hex or ENS address</span>
+    {:else}
+  <span class="invalid">{el.validationMessage}</span>
+    {/if}
   {/if}
 </label>
 

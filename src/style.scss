@@ -63,6 +63,11 @@ label {
     position: absolute;
     right: 5px;
   }
+
+  .invalid {
+    text-align: center;
+    color: rgba(200, 30, 30, 0.8);
+  }
 }
 
 button, input[type="submit"] {

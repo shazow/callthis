@@ -4,6 +4,8 @@
   import { autoload } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
   import Address from '$lib/contract/Address.svelte';
+  import Summary from '$lib/contract/Summary.svelte';
+  import Value from '$lib/contract/Value.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   export let config : Config;
@@ -158,45 +160,10 @@
   {/if}
 
   {#if value || editing}
-  <label>
-    <span>Value</span>
-    <input type="text" name="value" bind:value={value} placeholder="0" disabled={ !editing }/>
-  </label>
+  <Value bind:value={value} disabled={ !editing }><span>Value</span></Value>
   {/if}
 
-  <!-- TODO: Move to a TransactionSummary component -->
-  <quote>
-    {#if selectedFragment}
-    Call <code>{selectedFragment.format("sighash")}</code>
-      {#if toResolved}
-      on contract at <code>{toResolved}</code>
-      {:else if to}
-      on contract at <code>{to}</code>
-      {:else}
-      ...
-      {/if}
-      {#if value}
-      with <code>{value} ether</code>
-      {/if}
-    {:else if value}
-    Send <code>{value} ether</code>
-      {#if toResolved}
-      to <code>{toResolved}</code>
-      {:else if to}
-      to <code>{to}</code>
-      {:else}
-      ...
-      {/if}
-    {:else if to}
-    Call contract at
-      {#if toResolved}
-      <code>{toResolved}</code>
-      {:else}
-      <code>{to}</code>
-      {/if}
-      without any data
-    {/if}
-  </quote>
+  <Summary to={ toResolved || to } value={value} callSignature={selectedFragment?.format("sighash")} />
 
   <label>
     <span>Transaction</span>
@@ -244,27 +211,6 @@
     }
     &.error {
       background: rgba(170, 85, 95);
-    }
-  }
-
-  quote {
-    color: rgba(0, 0, 0, 0.8);
-    display: block;
-    border-left: 5px solid rgba(255, 160, 70, 0.8);
-    border-radius: 5px;
-    background: rgba(255, 160, 70, 0.1);
-    padding: 0.3em 0.5em;
-    line-height: 1.7em;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 1em;
-
-    code {
-      background: rgba(255, 210, 70, 0.6);
-      font-weight: bold;
-      padding: 0.1em 0.3em;
-      color: rgba(105, 95, 25, 0.8);
-      border-radius: 3px;
     }
   }
 </style>
