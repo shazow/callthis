@@ -38,7 +38,7 @@
 {#if !params.to}
 <section class="example">
   <p>
-    <strong>Example:</strong> <a href="/?to=shazow.eth&value=0.1">Send 0.1 ETH to shazow.eth</a> 🥹
+    <strong>Example:</strong> <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to callthis.eth</a> 🥹
   </p>
 </section>
 {/if}
