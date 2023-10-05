@@ -25,15 +25,18 @@
       [calldata.slice(0, 10)]: p.getAll("arg")
     };
     const value = p.get("value") || "";
+    editing = (to === "");
     return {
       to, calldata, args, value
     }
   }
 
   $: params = getParams($page.url.searchParams);
+
+  let editing : boolean;
 </script>
 
-<TransactionBuilder config={ wcConfig } to={ params.to } calldata={ params.calldata } args={ params.args } value={ params.value }/>
+<TransactionBuilder config={ wcConfig } editing={editing} to={ params.to } calldata={ params.calldata } args={ params.args } value={ params.value }/>
 
 {#if !params.to}
 <section class="example">

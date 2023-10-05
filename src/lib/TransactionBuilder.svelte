@@ -14,6 +14,7 @@
   export let args : Record<string, string[]>;
   export let value : string;
   export let to : string;
+  export let editing : boolean = (to === "");
 
   let from : string;
   let toResolved : string;
@@ -28,7 +29,6 @@
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
-  let editing : boolean = (to === "");
   let submitting = false;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
   let form : HTMLFormElement;
