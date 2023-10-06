@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {browser} from "$app/environment";
   import { page } from '$app/stores';
 
   import TransactionBuilder from '$lib/TransactionBuilder.svelte';
@@ -18,6 +19,8 @@
     },
   }
 
+  let editing : boolean = false;
+
   function getParams(p : URLSearchParams) {
     const to = p.get("to") || "";
     const calldata = p.get("data") || "";
@@ -32,8 +35,6 @@
   }
 
   $: params = getParams($page.url.searchParams);
-
-  let editing : boolean;
 </script>
 
 <TransactionBuilder config={ wcConfig } editing={editing} to={ params.to } calldata={ params.calldata } args={ params.args } value={ params.value }/>
