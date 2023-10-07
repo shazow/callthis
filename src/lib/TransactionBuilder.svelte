@@ -89,9 +89,15 @@
 
     submitting = true;
     try {
+      let r = await provider.call(tx);
+      if (selectedFragment) {
+        // TODO: Use this function once its implemented: abi.parseCallResult(r)
+        const res = abi.decodeFunctionResult(selectedFragment, r);
+        r = res.toString();
+      }
       result = {
         status: "ok",
-        value: await provider.call(tx),
+        value: r,
       }
       log.info("Loaded result", result);
     } catch(err) {
@@ -247,6 +253,7 @@
     color: rgba(255, 255, 255, 0.9);
     font-family: monospace;
     font-weight: bold;
+    text-transform: initial;
     padding: 0.5rem 0.5rem;
 
     &.ok {
