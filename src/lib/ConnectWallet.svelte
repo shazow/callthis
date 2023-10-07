@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
   import { EthereumProvider } from "@walletconnect/ethereum-provider";
   import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
@@ -67,7 +67,6 @@
       }
     }
 
-    loading = true;
     const provider = await EthereumProvider.init(
       config as EthereumProviderOptions
     );
@@ -81,8 +80,16 @@
       dispatch("disconnect");
     });
 
+    if (provider.session) {
+      // Resume session
+      accounts = provider.accounts;
+      dispatch("connect", { provider, accounts });
+      return;
+    }
+
     try {
-      provider.connect();
+      loading = true;
+      provider.enable();
     } catch (err) {
       console.error("WalletConnect failed", err);
       dispatch("disconnect");
@@ -90,6 +97,20 @@
       loading = false;
     }
   }
+
+  onMount(async () => {
+    // Resume WalletConnect session?
+    // TODO: Make provider reactive so we can inject a new wallet connect config later, so users can BYO configs
+    const provider = await EthereumProvider.init(
+      config as EthereumProviderOptions
+    );
+    if (provider.session) {
+      // Resume session
+      accounts = provider.accounts;
+      dispatch("connect", { provider, accounts });
+      return;
+    }
+  });
 
   export const methods = {
     connect,

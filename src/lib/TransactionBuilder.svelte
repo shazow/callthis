@@ -25,7 +25,8 @@
   let connectMethods : {
     connect(): Promise<void>;
   };
-  let provider : ethers.BrowserProvider;
+  let provider : ethers.Provider = ethers.getDefaultProvider("homestead");
+  let signer : ethers.Signer;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let selectedFunction : string;
@@ -66,7 +67,7 @@
     log.info("Submitting transaction");
 
     if (!provider) {
-      return log.error("Wallet provider not available");
+      return log.error("Ethereum provider not available");
     }
 
     if (!toResolved) {
@@ -112,17 +113,18 @@
   //}
 
   async function loadAddress(event?: CustomEvent) {
-    if (!provider) {
-      if (calldata.length < 10 && hint) return;
+    if (calldata.length >= 10 && hint) {
       const maybeABI = ethers.Interface.from(["function " + hint]);
       const fn = maybeABI.getFunction(calldata.slice(0, 10));
       if (!fn) return;
-
+   
       selectedFunction = fn.selector;
       abi = maybeABI;
       functions = [fn];
       updateFunction();
       log.info('Loaded partial ABI from hint');
+    }
+    if (!provider) {
       return;
     }
     if (event) toResolved = event.detail.resolved;
@@ -156,7 +158,9 @@
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
-    provider = new ethers.BrowserProvider(wallet.provider);
+    const browserProvider = new ethers.BrowserProvider(wallet.provider);
+    provider = browserProvider;
+    signer = await browserProvider.getSigner();
     from = wallet.accounts[0];
 
     log.info(`Connected wallet: ${from}`);

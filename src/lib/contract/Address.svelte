@@ -14,6 +14,7 @@
   export const methods = {
     async resolve(target: any): Promise<string> {
       error = "";
+      if (!value) return "";
       try {
         resolved = await resolver(value);
       } catch (err) {
