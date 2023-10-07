@@ -29,12 +29,20 @@
   let signer : ethers.Signer;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
+  let functionsFor : string;
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
   let submitting = false;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
+  let receipt : ethers.TransactionReceipt | null;
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
+  let preparedTx : {
+    from: string,
+    to: string,
+    data: string,
+    value: bigint | null,
+  } | null = null;
 
   onMount(async () => {
     // Load hint?
@@ -77,6 +85,11 @@
   };
 
   async function handleSubmit() {
+    if (submitting) {
+      log.info("Already submitting, ignored new submit");
+      return;
+    }
+    preparedTx = null;
     log.info("Submitting transaction");
 
     if (!provider) {
@@ -117,19 +130,39 @@
       return log.error(err as Error);
     } finally {
       submitting = false;
+      const mutability = selectedFragment?.stateMutability;
+      if (mutability !== "view" && mutability != "pure") {
+        preparedTx = tx;
+      } else {
+        log.info(`Function is not mutable: ${mutability}`)
+      }
     }
   }
 
-  //async function submitTransaction() {
-  //  const signer = await provider.getSigner();
-  //  let r = await signer.sendTransaction(tx);
-  //}
+  async function submitTransaction() {
+    if (submitting) {
+      log.info("Already submitting, ignored new submit");
+      return;
+    }
+    if (!preparedTx) {
+      return log.error("Missing prepared transaction, do a call on a mutable function");
+    }
+    submitting = true;
+    try {
+      let r = await signer.sendTransaction(preparedTx);
+      log.info("Waiting for transaction: ", r.hash);
+      receipt = await r.wait();
+    } finally {
+      submitting = false;
+    }
+  }
 
   async function loadAddress(event?: CustomEvent) {
     if (!provider) {
       return;
     }
     if (event) toResolved = event.detail.resolved;
+    if (functionsFor != to) functions = [];
 
     const r = await autoload(to, {
       provider,
@@ -147,6 +180,8 @@
   }
 
   function updateFunction() {
+    functionsFor = to;
+
     if (calldata.slice(0, 10) !== selectedFunction) {
       calldata = selectedFunction
     }
@@ -262,15 +297,23 @@
     {#if !provider}
     <button on:click|preventDefault={ connectMethods.connect } >⛓️ Connect Wallet</button>
     {/if}
-    <input type="submit" value="☎️ Execute" disabled={ !provider || toResolved === "" }>
+    <input type="submit" value="☎️ Call" disabled={ !provider || toResolved === "" }>
   </label>
 
   {#if result}
   <label for={undefined}>
     <span>Result</span>
     <div class="result {result.status}">
-      {result.value || result.message}
+      {result.value || result.message || "✔️"}
     </div>
+  </label>
+  {/if}
+
+  {#if preparedTx}
+  <label>
+    <span>Execute On-chain</span>
+    <button on:click|preventDefault={ submitTransaction } disabled={ submitting }>🚀 Submit Transaction</button>
+    <p class="warning">Please confirm details in your wallet before accepting</p>
   </label>
   {/if}
 
@@ -290,6 +333,7 @@
     font-weight: bold;
     text-transform: initial;
     padding: 0.5rem 0.5rem;
+    text-align: left;
 
     &.ok {
       word-break: break-all;
@@ -299,5 +343,16 @@
     &.error {
       background: rgba(170, 85, 95);
     }
+  }
+
+  .warning {
+    &:before {
+      content: "⚠️ ";
+    }
+    margin: 0.5em 0 1em 0;
+    font-weight: bold;
+    color: rgb(200, 150, 50);
+    text-align: center;
+    width: 100%;
   }
 </style>
