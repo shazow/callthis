@@ -37,8 +37,21 @@
   let functionArgs : Array<string>;
 
   onMount(async () => {
+    // Load hint?
+    if (calldata.length >= 10 && hint) {
+      const maybeABI = ethers.Interface.from(["function " + hint]);
+      const fn = maybeABI.getFunction(calldata.slice(0, 10));
+      if (!fn) return;
+   
+      selectedFunction = fn.selector;
+      abi = maybeABI;
+      functions = [fn];
+      updateFunction();
+      log.info('Loaded partial ABI from hint');
+    }
+
     if (provider) await toMethods.resolve("mount");
-    if (to) await loadAddress();
+    else if (to) await loadAddress();
   });
 
   const log = {
@@ -113,17 +126,6 @@
   //}
 
   async function loadAddress(event?: CustomEvent) {
-    if (calldata.length >= 10 && hint) {
-      const maybeABI = ethers.Interface.from(["function " + hint]);
-      const fn = maybeABI.getFunction(calldata.slice(0, 10));
-      if (!fn) return;
-   
-      selectedFunction = fn.selector;
-      abi = maybeABI;
-      functions = [fn];
-      updateFunction();
-      log.info('Loaded partial ABI from hint');
-    }
     if (!provider) {
       return;
     }
