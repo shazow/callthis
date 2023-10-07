@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { ethers } from "ethers";
-  import { autoload } from "@shazow/whatsabi";
+  import { whatsabi } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
@@ -164,7 +164,7 @@
     if (event) toResolved = event.detail.resolved;
     if (functionsFor != to) functions = [];
 
-    const r = await autoload(to, {
+    const r = await whatsabi.autoload(to, {
       provider,
       followProxies: true,
       onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
@@ -173,9 +173,11 @@
     log.info(`Loaded ABI: ${r.abi?.length} items from ${r.address}`)
 
     selectedFunction = calldata.slice(0, 10);
-    abi = ethers.Interface.from(r.abi);
-    functions = [];
-    abi.forEachFunction(f => functions.push(f));
+    if (functions.length === 0 || r.abi.length > 0) {
+      abi = ethers.Interface.from(r.abi);
+      functions = [];
+      abi.forEachFunction(f => functions.push(f));
+    }
     updateFunction();
   }
 
