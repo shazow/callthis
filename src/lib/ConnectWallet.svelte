@@ -35,16 +35,20 @@
   let loading = false;
 
   // Attempt to request accounts from injected provider
-  async function requestAccounts(injected?: InjectedProvider) {
+  async function requestAccounts(injected?: InjectedProvider): Promise<string[]> {
     if (injected === undefined) return [];
 
     if (injected.request !== undefined) {
+      // Resume?
+      const r = await injected.request({method: 'eth_accounts'});
+      if (r.length > 0) return r;
+
       try {
         return await injected.request({ method: "eth_requestAccounts" });
       } catch (error) {
         if ((error as InjectedRequestError).code === 4001) {
           // User rejected request
-          return;
+          return [];
         }
         throw error;
       }
@@ -58,6 +62,7 @@
   }
 
   export async function connect() {
+    // Check for injected wallet
     const injected = (window as EthereumWindow).ethereum as InjectedProvider;
     if (injected) {
       accounts = (await requestAccounts(injected)) || [];
@@ -71,6 +76,13 @@
       config as EthereumProviderOptions
     );
 
+    if (provider.session) {
+      // Resume WalletConnect session
+      accounts = provider.accounts;
+      dispatch("connect", { provider, accounts });
+      return;
+    }
+
     provider.on("connect", () => {
       accounts = provider.accounts;
       dispatch("connect", { provider, accounts });
@@ -79,13 +91,6 @@
       accounts = [];
       dispatch("disconnect");
     });
-
-    if (provider.session) {
-      // Resume session
-      accounts = provider.accounts;
-      dispatch("connect", { provider, accounts });
-      return;
-    }
 
     try {
       loading = true;
@@ -99,17 +104,21 @@
   }
 
   onMount(async () => {
-    // Resume WalletConnect session?
+    // Resume wallet sessions?
+
     // TODO: Make provider reactive so we can inject a new wallet connect config later, so users can BYO configs
-    const provider = await EthereumProvider.init(
-      config as EthereumProviderOptions
-    );
-    if (provider.session) {
-      // Resume session
-      accounts = provider.accounts;
-      dispatch("connect", { provider, accounts });
-      return;
+    const walletconnect = await EthereumProvider.init(config as EthereumProviderOptions);
+    if (walletconnect.session) {
+      return connect();
     }
+
+    const injected = (window as EthereumWindow).ethereum as InjectedProvider;
+    if (!injected || !injected.request) return;
+    const a = await injected.request({method: 'eth_accounts'});
+    if (a.length > 0) {
+      return connect();
+    }
+
   });
 
   export const methods = {
