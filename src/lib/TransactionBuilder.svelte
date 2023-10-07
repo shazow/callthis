@@ -106,6 +106,11 @@
     }
   }
 
+  //async function submitTransaction() {
+  //  const signer = await provider.getSigner();
+  //  let r = await signer.sendTransaction(tx);
+  //}
+
   async function loadAddress(event?: CustomEvent) {
     if (!provider) {
       if (calldata.length < 10 && hint) return;
