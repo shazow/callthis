@@ -32,6 +32,7 @@
   let submitting = false;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
   let form : HTMLFormElement;
+  let functionArgs : Array<string>;
 
   onMount(() => {
     if (provider) toMethods.resolve("mount");
@@ -58,10 +59,6 @@
     if (r instanceof Promise) return r;
     return Promise.resolve(r);
   };
-
-  function getArg(index: number) {
-    return args[selectedFunction]?.[index] || "";
-  }
 
   async function handleSubmit() {
     log.info("Submitting transaction");
@@ -127,8 +124,16 @@
   }
 
   function updateFunction() {
-    calldata = selectedFunction;
+    if (calldata.slice(0, 10) !== selectedFunction) {
+      calldata = selectedFunction
+    }
     selectedFragment = functions.find(f => f.selector === selectedFunction);
+    functionArgs = args[selectedFunction] || [];
+
+    if (calldata.length > 10 && selectedFragment) {
+      // Calldata has args that we can parse
+      functionArgs = abi.decodeFunctionData(selectedFragment, calldata);
+    }
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
@@ -168,6 +173,11 @@
     window.history.pushState({}, "link", $page.url);
     editing = false;
   }
+
+  function updateCalldata() {
+    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, functionArgs) || "";
+  }
+
 </script>
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}">
@@ -197,7 +207,7 @@
     <input type="text" placeholder="Unsupported type: {input.type}" disabled />
     {:else}
     <span>{input.name}</span>
-    <input type="text" value="{getArg(i)}" />
+    <input type="text" bind:value={functionArgs[i]} required on:change={ updateCalldata }/>
     <aside>{input.type}</aside>
     {/if}
   </label>
