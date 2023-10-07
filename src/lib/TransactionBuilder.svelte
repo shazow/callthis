@@ -15,6 +15,7 @@
   export let value : string;
   export let to : string;
   export let editing : boolean = (to === "");
+  export let hint : string;
 
   let from : string;
   let toResolved : string;
@@ -34,8 +35,9 @@
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
 
-  onMount(() => {
-    if (provider) toMethods.resolve("mount");
+  onMount(async () => {
+    if (provider) await toMethods.resolve("mount");
+    if (to) await loadAddress();
   });
 
   const log = {
@@ -105,7 +107,19 @@
   }
 
   async function loadAddress(event?: CustomEvent) {
-    if (!provider) return;
+    if (!provider) {
+      if (calldata.length < 10 && hint) return;
+      const maybeABI = ethers.Interface.from(["function " + hint]);
+      const fn = maybeABI.getFunction(calldata.slice(0, 10));
+      if (!fn) return;
+
+      selectedFunction = fn.selector;
+      abi = maybeABI;
+      functions = [fn];
+      updateFunction();
+      log.info('Loaded partial ABI from hint');
+      return;
+    }
     if (event) toResolved = event.detail.resolved;
 
     const r = await autoload(to, {
