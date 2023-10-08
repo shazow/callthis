@@ -292,14 +292,14 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ updateLink } >💾 Save</button>
+    <button on:click|preventDefault={ updateLink } >💾 Save Link</button>
     {:else}
     <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit</button>
     {/if}
     {#if !provider}
     <button on:click|preventDefault={ connectMethods.connect } >⛓️ Connect Wallet</button>
     {/if}
-    <input type="submit" value="☎️ Call" disabled={ !provider || toResolved === "" }>
+    <input type="submit" value="☎️ Preview Call" disabled={ !provider || toResolved === "" }>
   </label>
 
   {#if result}
