@@ -321,6 +321,14 @@
 
 </form>
 
+{#if !to}
+<section class="example">
+  <p>
+    <strong>Example:</strong> <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to callthis.eth</a> 🥹
+  </p>
+</section>
+{/if}
+
 <style lang="scss">
   label.input {
     padding-left: 1rem;

@@ -6,6 +6,10 @@
     <slot />
 </main>
 
+<footer>
+  <a class="icon-oss" target="_blank" href="https://github.com/shazow/callthis">Open Source</a>
+</footer>
+
 <script lang="ts">
   import "../style.scss";
 </script>

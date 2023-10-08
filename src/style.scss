@@ -5,14 +5,31 @@
 
   --link-color: var(--header-color);
   --link-color-hover: var(--link-color);
+
+  height: 100%;
+}
+
+@media (max-width: 34rem) {
+  :root {
+    font-size: 0.7rem;
+  }
 }
 
 
 body {
+  height: 100%;
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: rgb(42,42,42);
+}
+
+.container {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  width:100%;
+  height:100%;
 }
 
 a {
@@ -24,13 +41,18 @@ a {
   } 
 }
 
+main {
+  margin: 0 auto;
+  max-width: 34rem;
+  flex-grow: 1;
+  flex: 1 0 auto;
+}
+
 header {
-  width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 20px;
   margin: 0;
 
   font-weight: bold;
@@ -52,18 +74,29 @@ header h1 {
   width: 100%;
 }
 
-h2 {
-  color: rgba(0, 0, 0, 0.6);
+footer {
+  background: rgba(50, 50, 50, 0.1);
+  box-sizing: border-box;
+  width: 100%;
+  flex-shrink: 0;
+
+  font-weight: bold;
+  padding: 1.25em 1em;
+
+  a {
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.6);
+  }
 }
 
-main {
-    margin: 20px auto;
-    max-width: 34rem;
+h2 {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 label {
   position: relative;
   display: flex;
+  flex: 1;
   flex-flow: wrap;
   justify-content: space-between;
   column-gap: 0.5rem;
@@ -122,10 +155,8 @@ input[type=text], textarea, select {
 }
 
 form {
-  width: 100%;
   margin: 2rem 0;
   background: rgb(255, 255, 255);
-  padding: 0.5rem 0.8rem;
   border-radius: 5px;
 }
 
@@ -139,4 +170,11 @@ form {
     padding: 1em 1.5em;
     background: rgba(255, 200, 80, 0.5);
   }
+}
+
+.icon-oss {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="16" height="16" viewBox="0 0 16 16"%3E%3Cpath fill="currentColor" d="M15.698 7.287L8.712.302a1.03 1.03 0 0 0-1.457 0l-1.45 1.45l1.84 1.84a1.223 1.223 0 0 1 1.55 1.56l1.773 1.774a1.224 1.224 0 0 1 1.267 2.025a1.226 1.226 0 0 1-2.002-1.334L8.58 5.963v4.353a1.226 1.226 0 1 1-1.008-.036V5.887a1.226 1.226 0 0 1-.666-1.608L5.093 2.465l-4.79 4.79a1.031 1.031 0 0 0 0 1.457l6.986 6.986a1.03 1.03 0 0 0 1.457 0l6.953-6.953a1.03 1.03 0 0 0 0-1.458"%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  padding-left: 24px;
+  background-position: left bottom;
 }
