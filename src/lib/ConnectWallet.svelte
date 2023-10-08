@@ -61,14 +61,16 @@
     throw new Error("Unknown injected provider");
   }
 
-  export async function connect() {
+  export async function connect(force: "walletconnect"|"injected") {
     // Check for injected wallet
-    const injected = (window as EthereumWindow).ethereum as InjectedProvider;
-    if (injected) {
-      accounts = (await requestAccounts(injected)) || [];
-      if (accounts.length > 0) {
-        dispatch("connect", { provider: injected, accounts: accounts });
-        return;
+    if (force !== "walletconnect") {
+      const injected = (window as EthereumWindow).ethereum as InjectedProvider;
+      if (injected) {
+        accounts = (await requestAccounts(injected)) || [];
+        if (accounts.length > 0) {
+          dispatch("connect", { provider: injected, accounts: accounts });
+          return;
+        }
       }
     }
 
@@ -109,14 +111,16 @@
     // TODO: Make provider reactive so we can inject a new wallet connect config later, so users can BYO configs
     const walletconnect = await EthereumProvider.init(config as EthereumProviderOptions);
     if (walletconnect.session) {
-      return connect();
+      console.log("WalletConnect session detected, resuming", walletconnect.session);
+      return connect("walletconnect");
     }
 
     const injected = (window as EthereumWindow).ethereum as InjectedProvider;
     if (!injected || !injected.request) return;
     const a = await injected.request({method: 'eth_accounts'});
     if (a.length > 0) {
-      return connect();
+      console.log("MetaMask session detected, resuming", a);
+      return connect("injected");
     }
 
   });
