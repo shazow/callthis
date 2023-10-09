@@ -127,6 +127,7 @@ label {
 button, input[type="submit"] {
   flex-grow: 1;
   width: 30%;
+  cursor: pointer;
 }
 
 input, textarea, select, button {
@@ -177,4 +178,37 @@ form {
   background-repeat: no-repeat;
   padding-left: 24px;
   background-position: left bottom;
+}
+
+.icon-loading {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cg fill="none" stroke="%233296ff" stroke-linecap="round" stroke-width="2"%3E%3Cpath stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"%3E%3Canimate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60%3B0"%2F%3E%3C%2Fpath%3E%3Cpath stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"%3E%3Canimate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15%3B0"%2F%3E%3CanimateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12%3B360 12 12"%2F%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+}
+
+.icon-call {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="m16.052 1.787l.966.261a7 7 0 0 1 4.93 4.934l.26.965l-1.93.521l-.261-.965a5 5 0 0 0-3.522-3.524l-.965-.262l.522-1.93ZM1 2h8.58l1.487 6.69l-1.86 1.86a14.08 14.08 0 0 0 4.243 4.242l1.86-1.859L22 14.42V23h-1a19.91 19.91 0 0 1-10.85-3.196a20.102 20.102 0 0 1-5.954-5.954A19.911 19.911 0 0 1 1 3V2Zm2.027 2a17.894 17.894 0 0 0 2.849 8.764a18.102 18.102 0 0 0 5.36 5.36A17.892 17.892 0 0 0 20 20.973v-4.949l-4.053-.9l-2.174 2.175l-.663-.377a16.073 16.073 0 0 1-6.032-6.032l-.377-.663l2.175-2.174L7.976 4H3.027Zm12.111 1.165l.966.261a3.5 3.5 0 0 1 2.465 2.467l.26.965l-1.93.521l-.261-.965a1.5 1.5 0 0 0-1.057-1.057l-.965-.261l.522-1.931Z"%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+  background-size: 1em;
+}
+
+.icon-edit {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="m18.988 2.012l3 3L19.701 7.3l-3-3zM8 16h3l7.287-7.287l-3-3L8 13z"%2F%3E%3Cpath fill="currentColor" d="M19 19H8.158c-.026 0-.053.01-.079.01c-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .896-2 2v14c0 1.104.897 2 2 2h14a2 2 0 0 0 2-2v-8.668l-2 2V19z"%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+  background-size: 1em;
+}
+
+.icon-connect {
+  &:before {
+    float: left;
+    content: "⛓️";
+  }
+}
+
+.icon-save {
+  &:before {
+    float: left;
+    content: "💾";
+  }
 }

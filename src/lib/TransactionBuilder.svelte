@@ -44,6 +44,8 @@
     value: bigint | null,
   } | null = null;
 
+  let loading : Record<string, boolean> = {};
+
   onMount(async () => {
     // Load hint?
     if (calldata.length >= 10 && hint) {
@@ -164,11 +166,17 @@
     if (event) toResolved = event.detail.resolved;
     if (functionsFor != to) functions = [];
 
-    const r = await whatsabi.autoload(to, {
-      provider,
-      followProxies: true,
-      onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
-    });
+    let r;
+    loading.to = true;
+    try {
+      r = await whatsabi.autoload(to, {
+        provider,
+        followProxies: true,
+        onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
+      });
+    } finally {
+      loading.to = false;
+    }
 
     log.info(`Loaded ABI: ${r.abi?.length} items from ${r.address}`)
 
@@ -250,7 +258,13 @@
 
   <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
 
-  {#if functions}
+  {#if loading.to}
+  <div class="loading icon-loading">
+  Checking if address is a contract and loading the interface...
+  </div>
+  {/if}
+
+  {#if functions && (editing || selectedFunction)}
   <label>
     <span>Function</span>
     <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
@@ -292,14 +306,14 @@
   <label>
     <span>Transaction</span>
     {#if editing}
-    <button on:click|preventDefault={ updateLink } >💾 Save Link</button>
+    <button class="icon-save" on:click|preventDefault={ updateLink }>Save Link</button>
     {:else}
-    <button on:click|preventDefault={ () => { editing = true }}>⌨ Edit</button>
+    <button class="icon-edit" on:click|preventDefault={ () => { editing = true }}>Edit</button>
     {/if}
-    {#if !provider}
-    <button on:click|preventDefault={ connectMethods.connect } >⛓️ Connect Wallet</button>
+    {#if !signer}
+    <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
     {/if}
-    <input type="submit" value="☎️ Preview Call" disabled={ !provider || toResolved === "" }>
+    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || toResolved === "" }>
   </label>
 
   {#if result}
@@ -314,7 +328,7 @@
   {#if preparedTx}
   <label>
     <span>Execute On-chain</span>
-    <button on:click|preventDefault={ submitTransaction } disabled={ submitting }>🚀 Submit Transaction</button>
+    <button on:click|preventDefault={ submitTransaction } disabled={ !signer || submitting }>🚀 Submit Transaction</button>
     <p class="warning">Please confirm details in your wallet before accepting</p>
   </label>
   {/if}
@@ -330,6 +344,14 @@
 {/if}
 
 <style lang="scss">
+  .loading {
+    padding-left: 2em;
+    line-height: 1.5em;
+    margin-bottom: 1em;
+    font-weight: bold;
+    font-style: italic;
+    color: rgba(0, 100, 185, 0.5);
+  }
   label.input {
     padding-left: 1rem;
     border-left: 0.5rem solid rgba(35,80,180,0.3);

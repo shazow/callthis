@@ -16,11 +16,15 @@
       error = "";
       if (!value) return "";
       try {
+        loading = true;
         resolved = await resolver(value);
       } catch (err) {
         error = "Failed to resolve";
         throw err;
+      } finally {
+        loading = false;
       }
+      error = "";
       if (was === resolved) return resolved;
       was = resolved;
       dispatch("change", { target, value, resolved });
@@ -31,6 +35,7 @@
   let el: HTMLInputElement;
   let was = "";
   let error = "";
+  let loading = false;
 
   const dispatch = createEventDispatcher();
 
@@ -55,6 +60,7 @@
     {disabled}
     {readonly}
     {required}
+    class:icon-loading={loading}
   />
   {#if resolved && resolved != value}
     <details>
@@ -81,6 +87,10 @@
     --resolved-color: rgb(255, 255, 255);
     --resolved-background: rgb(85, 170, 95);
     --resolved-border: 2px solid var(--resolved-background);
+  }
+
+  .icon-loading {
+    background-position: right 0.5em center;
   }
 
   input {
