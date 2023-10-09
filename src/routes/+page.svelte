@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {browser} from "$app/environment";
   import { page } from '$app/stores';
 
   import TransactionBuilder from '$lib/TransactionBuilder.svelte';
@@ -12,10 +11,10 @@
     chains: [1],
     optionalChains: [11155111], // Sepolia
     metadata: {
-      name: "Call This?",
-      description: "Share a transaction for someone else to call",
-      url: "https://callthis.eth",
-      icons: ["https://callthis.eth.link/icon-128px.png"],
+      name: "callthis.eth",
+      description: "Build a transaction for someone else to execute",
+      url: window.location.origin,
+      icons: [window.location.origin + "/favicon.png"],
     },
   }
 
