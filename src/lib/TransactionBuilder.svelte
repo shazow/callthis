@@ -25,14 +25,14 @@
   let connectMethods : {
     connect(): Promise<void>;
   };
-  let provider : ethers.Provider = ethers.getDefaultProvider("homestead");
+  const defaultProvider = ethers.getDefaultProvider("homestead");
+  let provider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let functionsFor : string;
   let selectedFunction : string;
   let selectedFragment : ethers.FunctionFragment | undefined;
-  let submitting = false;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
   let receipt : ethers.TransactionReceipt | null;
   let form : HTMLFormElement;
@@ -87,7 +87,7 @@
   };
 
   async function handleSubmit() {
-    if (submitting) {
+    if (loading.submit) {
       log.info("Already submitting, ignored new submit");
       return;
     }
@@ -115,7 +115,7 @@
       return log.error("Failed resolving 'to' address");
     }
 
-    submitting = true;
+    loading.submit = true;
     try {
       let r = await provider.call(tx);
       if (selectedFragment) {
@@ -131,7 +131,7 @@
     } catch(err) {
       return log.error(err as Error);
     } finally {
-      submitting = false;
+      loading.submit = false;
       const mutability = selectedFragment?.stateMutability;
       if (mutability !== "view" && mutability != "pure") {
         preparedTx = tx;
@@ -142,20 +142,20 @@
   }
 
   async function submitTransaction() {
-    if (submitting) {
+    if (loading.submit) {
       log.info("Already submitting, ignored new submit");
       return;
     }
     if (!preparedTx) {
       return log.error("Missing prepared transaction, do a call on a mutable function");
     }
-    submitting = true;
+    loading.submit = true;
     try {
       let r = await signer.sendTransaction(preparedTx);
       log.info("Waiting for transaction: ", r.hash);
       receipt = await r.wait();
     } finally {
-      submitting = false;
+      loading.submit = false;
     }
   }
 
@@ -170,7 +170,7 @@
     loading.to = true;
     try {
       r = await whatsabi.autoload(to, {
-        provider,
+        provider: provider,
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
       });
@@ -251,12 +251,12 @@
 </script>
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}">
-  <label for={undefined}>
-    <span>From</span>
+  <section>
+    <h2>From</h2>
     <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }" />
-  </label>
+  </section>
 
-  <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><span>To</span></Address>
+  <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
 
   {#if loading.to}
   <div class="loading icon-loading">
@@ -266,7 +266,7 @@
 
   {#if functions && (editing || selectedFunction)}
   <label>
-    <span>Function</span>
+    <h2>Function</h2>
     <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
       <option></option>
       {#each functions as f}
@@ -278,47 +278,44 @@
 
   {#if selectedFragment}
   {#each selectedFragment.inputs as input, i}
-  <label class="input">
+  <section class="input">
     {#if input.baseType === "tuple" || input.baseType === "array" }
     <input type="text" placeholder="Unsupported type: {input.type}" disabled />
     {:else}
-    <span>{input.name}</span>
+    <span class="input-name">{input.name}</span>
     <input type="text" bind:value={functionArgs[i]} required on:change={ updateCalldata }/>
     <aside>{input.type}</aside>
     {/if}
-  </label>
+  </section>
   {/each}
   {/if}
 
   {#if calldata || editing}
   <label>
-    <span>Calldata</span>
+    <h2>Calldata</h2>
     <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
   </label>
   {/if}
 
   {#if value || editing}
-  <Value bind:value={value} disabled={ !editing }><span>Value</span></Value>
+  <Value bind:value={value} disabled={ !editing }><h2>Value</h2></Value>
   {/if}
 
   <Summary to={ toResolved || to } value={value} callSignature={selectedFragment?.format("sighash")} />
 
-  <label>
-    <span>Transaction</span>
+  <section>
+    <h2>Transaction</h2>
     {#if editing}
     <button class="icon-save" on:click|preventDefault={ updateLink }>Save Link</button>
     {:else}
     <button class="icon-edit" on:click|preventDefault={ () => { editing = true }}>Edit</button>
     {/if}
-    {#if !signer}
-    <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
-    {/if}
-    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || toResolved === "" }>
-  </label>
+    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || !toResolved || loading.submit }>
+  </section>
 
   {#if result}
   <label for={undefined}>
-    <span>Result</span>
+    <h2>Result</h2>
     <div class="result {result.status}">
       {result.value || result.message || "✔️"}
     </div>
@@ -326,11 +323,14 @@
   {/if}
 
   {#if preparedTx}
-  <label>
-    <span>Execute On-chain</span>
+  <section>
+    <h2>Execute On-chain</h2>
+    {#if !signer}
+    <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
+    {/if}
     <button on:click|preventDefault={ submitTransaction } disabled={ !signer || submitting }>🚀 Submit Transaction</button>
     <p class="warning">Please confirm details in your wallet before accepting</p>
-  </label>
+  </section>
   {/if}
 
 </form>
@@ -352,9 +352,12 @@
     font-style: italic;
     color: rgba(0, 100, 185, 0.5);
   }
-  label.input {
+  section.input {
     padding-left: 1rem;
     border-left: 0.5rem solid rgba(35,80,180,0.3);
+  }
+  .input-name {
+    text-transform: initial;
   }
 
   .result {
