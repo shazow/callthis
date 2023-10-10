@@ -61,7 +61,7 @@
     throw new Error("Unknown injected provider");
   }
 
-  export async function connect(force: "walletconnect"|"injected") {
+  export async function connect(force: "walletconnect"|"injected"|"any") {
     // Check for injected wallet
     if (force !== "walletconnect") {
       const injected = (window as EthereumWindow).ethereum as InjectedProvider;
@@ -132,7 +132,7 @@
 
 <div class="connect-wallet">
 {#if accounts.length === 0}
-  <button on:click={connect}>
+  <button on:click={() => connect("any")}>
     <slot name="connect-label">Connect Wallet</slot>
   </button>
 
@@ -144,7 +144,7 @@
 {:else}
   <slot name="connected">
     <dl>
-      <dt>Connected</dt>
+      <dt><slot name="connected-label">Connected</slot></dt>
       <dd>{accounts[0]}</dd>
     </dl>
   </slot>

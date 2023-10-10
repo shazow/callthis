@@ -43,7 +43,10 @@
     data: string,
     value: bigint | null,
   } | null = null;
-
+  let network : {
+    chainId: bigint,
+    name: string,
+  };
   let loading : Record<string, boolean> = {};
 
   onMount(async () => {
@@ -118,7 +121,7 @@
     loading.submit = true;
     try {
       let r = await provider.call(tx);
-      if (selectedFragment) {
+      if (selectedFragment && selectedFragment.outputs?.length > 0) {
         // TODO: Use this function once its implemented: abi.parseCallResult(r)
         const res = abi.decodeFunctionResult(selectedFragment, r);
         r = res.toString();
@@ -209,7 +212,7 @@
     provider = browserProvider;
     signer = await browserProvider.getSigner();
     from = wallet.accounts[0];
-
+    network = await provider.getNetwork();
     log.info(`Connected wallet: ${from}`);
     if (to) toMethods.resolve("connect");
   }
@@ -253,7 +256,9 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}">
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }" />
+    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }">
+      <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
+    </ConnectWallet>
   </section>
 
   <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
@@ -328,7 +333,7 @@
     {#if !signer}
     <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
     {/if}
-    <button on:click|preventDefault={ submitTransaction } disabled={ !signer || submitting }>🚀 Submit Transaction</button>
+    <button on:click|preventDefault={ submitTransaction } disabled={ !signer || loading.submit }>🚀 Submit Transaction</button>
     <p class="warning">Please confirm details in your wallet before accepting</p>
   </section>
   {/if}
