@@ -310,7 +310,7 @@
     {:else}
     <button class="icon-edit" on:click|preventDefault={ () => { editing = true }}>Edit</button>
     {/if}
-    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || !toResolved || loading.submit }>
+    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || !to || loading.submit }>
   </section>
 
   {#if result}
