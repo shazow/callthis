@@ -43,7 +43,7 @@ a {
 
 main {
   margin: 0 auto;
-  width: 34rem;
+  max-width: 34rem;
   flex-grow: 1;
   flex: 1 0 auto;
 }
@@ -175,6 +175,10 @@ form {
     padding: 1em 1.5em;
     background: rgba(255, 200, 80, 0.5);
   }
+}
+
+.loading {
+  margin-bottom: 1em;
 }
 
 .icon-oss {

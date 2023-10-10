@@ -9,6 +9,13 @@
   import Value from '$lib/contract/Value.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
+  type PreparedTransaction = {
+    from: string,
+    to: string,
+    data: string | null,
+    value: bigint | null,
+  }
+
   export let config : Config;
   export let calldata : string;
   export let args : Record<string, string[]>;
@@ -37,12 +44,7 @@
   let receipt : ethers.TransactionReceipt | null;
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
-  let preparedTx : {
-    from: string,
-    to: string,
-    data: string,
-    value: bigint | null,
-  } | null = null;
+  let preparedTx : PreparedTransaction | null = null;
   let network : {
     chainId: bigint,
     name: string,
@@ -95,7 +97,7 @@
       return;
     }
     preparedTx = null;
-    log.info("Submitting transaction");
+    log.info("Submitting preview transaction", { from, toResolved, calldata, value });
 
     if (!provider) {
       return log.error("Ethereum provider not available");
@@ -106,12 +108,14 @@
       await toMethods.resolve("submit");
     }
 
-    const tx = {
+    const tx : PreparedTransaction = {
       from: from,
       to: toResolved,
-      data: calldata,
-      value: value && ethers.parseEther(value) || null,
+      data: null,
+      value: null,
     };
+    if (calldata.length > 0) tx.data = calldata;
+    if (value.length > 0) tx.value = ethers.parseEther(value);
 
     if (!tx.to) {
       // TODO: We can remove this check once ethers.js v6 bug is fixed?
@@ -152,6 +156,8 @@
     if (!preparedTx) {
       return log.error("Missing prepared transaction, do a call on a mutable function");
     }
+    log.info("Signing transaction", preparedTx);
+
     loading.submit = true;
     try {
       let r = await signer.sendTransaction(preparedTx);
@@ -264,12 +270,12 @@
   <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
 
   {#if loading.to}
-  <div class="loading icon-loading">
+  <section class="loading icon-loading">
   Checking if address is a contract and loading the interface...
-  </div>
+  </section>
   {/if}
 
-  {#if functions && (editing || selectedFunction)}
+  {#if functions?.length > 0 && (editing || selectedFunction)}
   <label>
     <h2>Function</h2>
     <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
