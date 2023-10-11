@@ -31,10 +31,11 @@
   };
   let connectMethods : {
     connect(): Promise<void>;
+    disconnect: null|(() => void),
   };
   const defaultProvider = ethers.getDefaultProvider("homestead");
   let provider : ethers.Provider = defaultProvider;
-  let signer : ethers.Signer;
+  let signer : ethers.Signer | undefined = undefined;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
   let functionsFor : string;
@@ -156,6 +157,9 @@
     if (!preparedTx) {
       return log.error("Missing prepared transaction, do a call on a mutable function");
     }
+    if (!signer) {
+      return log.error("Missing signer");
+    } 
     log.info("Signing transaction", preparedTx);
 
     loading.submit = true;
@@ -223,6 +227,12 @@
     if (to) toMethods.resolve("connect");
   }
 
+  async function disconnect() {
+    log.info("Wallet disconnected");
+    provider = defaultProvider;
+    signer = undefined;
+  }
+
   function updateLink() {
     if (!form.checkValidity()) {
       form.reportValidity();
@@ -259,15 +269,17 @@
 
 </script>
 
-<form bind:this={form} on:submit|preventDefault="{handleSubmit}">
+<form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect="{ (e) => connect(e.detail) }">
+    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
       <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
 
-  <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+  <section>
+    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+  </section>
 
   {#if loading.to}
   <section class="loading icon-loading">
@@ -276,15 +288,17 @@
   {/if}
 
   {#if functions?.length > 0 && (editing || selectedFunction)}
-  <label>
-    <h2>Function</h2>
-    <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
-      <option></option>
-      {#each functions as f}
-      <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
-      {/each}
-    </select>
-  </label>
+  <section>
+    <label>
+      <h2>Function</h2>
+      <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
+        <option></option>
+        {#each functions as f}
+        <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+        {/each}
+      </select>
+    </label>
+  </section>
   {/if}
 
   {#if selectedFragment}
@@ -302,17 +316,23 @@
   {/if}
 
   {#if calldata || editing}
-  <label>
-    <h2>Calldata</h2>
-    <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
-  </label>
+  <section>
+    <label>
+      <h2>Calldata</h2>
+      <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
+    </label>
+  </section>
   {/if}
 
   {#if value || editing}
-  <Value bind:value={value} disabled={ !editing }><h2>Value</h2></Value>
+  <section>
+    <Value bind:value={value} disabled={ !editing }><h2>Value</h2></Value>
+  </section>
   {/if}
 
-  <Summary to={ toResolved || to } value={value} callSignature={selectedFragment?.format("sighash")} />
+  <section>
+    <Summary to={ toResolved || to } value={value} callSignature={selectedFragment?.format("sighash")} />
+  </section>
 
   <section>
     <h2>Transaction</h2>
@@ -325,12 +345,14 @@
   </section>
 
   {#if result}
-  <label for={undefined}>
-    <h2>Result</h2>
-    <div class="result {result.status}">
-      {result.value || result.message || "✔️"}
-    </div>
-  </label>
+  <section>
+    <label for={undefined}>
+      <h2>Result</h2>
+      <div class="result {result.status}">
+        {result.value || result.message || "✔️"}
+      </div>
+    </label>
+  </section>
   {/if}
 
   {#if preparedTx}
@@ -340,7 +362,9 @@
     <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
     {/if}
     <button on:click|preventDefault={ submitTransaction } disabled={ !signer || loading.submit }>🚀 Submit Transaction</button>
+    {#if signer}
     <p class="warning">Please confirm details in your wallet before accepting</p>
+    {/if}
   </section>
   {/if}
 
@@ -372,7 +396,6 @@
   }
 
   .result {
-    width: 100%;
     border-radius: 5px;
     color: rgba(255, 255, 255, 0.9);
     font-family: monospace;

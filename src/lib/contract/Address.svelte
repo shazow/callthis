@@ -47,7 +47,7 @@
   }
 </script>
 
-<label class:resolved={resolved && resolved != value}>
+<label class:resolved={resolved}>
   <slot>Address</slot>
   <input
     type="text"
@@ -62,7 +62,7 @@
     {required}
     class:icon-loading={loading}
   />
-  {#if resolved && resolved != value}
+  {#if resolved}
     <details>
       <summary>{resolved}</summary>
       <!-- TODO: Add details like recent events -->
