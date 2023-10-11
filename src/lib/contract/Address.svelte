@@ -109,7 +109,6 @@
     details {
       box-sizing: border-box;
       font-size: 1em;
-      width: 100%;
       font-family: monospace;
       background: var(--resolved-background);
       color: var(--resolved-color);
