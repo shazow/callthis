@@ -403,6 +403,7 @@
     text-transform: initial;
     padding: 0.5rem 0.5rem;
     text-align: left;
+    overflow: auto;
 
     &.ok {
       word-break: break-all;
