@@ -115,8 +115,8 @@
       data: null,
       value: null,
     };
-    if (calldata.length > 0) tx.data = calldata;
-    if (value.length > 0) tx.value = ethers.parseEther(value);
+    if (calldata) tx.data = calldata;
+    if (value) tx.value = ethers.parseEther(value);
 
     if (!tx.to) {
       // TODO: We can remove this check once ethers.js v6 bug is fixed?
