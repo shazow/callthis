@@ -267,6 +267,32 @@
     calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, functionArgs) || "";
   }
 
+  type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
+
+  function splitMutability(fns:ethers.FunctionFragment[]): FunctionsByStateMutability {
+    const r : FunctionsByStateMutability = {
+      payable: [],
+      nonpayable: [],
+      readonly: [],
+      unknown: [],
+    };
+    if (!fns) return r;
+    for (const f of fns) {
+      if (f.stateMutability === "payable") r.payable.push(f);
+      else if (f.stateMutability === "nonpayable") r.nonpayable.push(f);
+      else if (f.stateMutability) r.readonly.push(f);
+      else r.unknown.push(f);
+    }
+    // Detect whatsabi failing to detect
+    if (!r.payable.length && !r.readonly.length && !r.unknown.length && r.nonpayable.length) {
+      r.unknown = r.nonpayable;
+      r.nonpayable = [];
+    }
+    return r;
+  }
+
+  $: splitFunctions = splitMutability(functions);
+
 </script>
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
@@ -293,9 +319,30 @@
       <h2>Function</h2>
       <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
         <option></option>
-        {#each functions as f}
+        {#each splitFunctions.unknown as f}
         <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
         {/each}
+        {#if splitFunctions.payable.length}
+        <optgroup label="Payable">
+          {#each splitFunctions.payable as f}
+          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          {/each}
+        </optgroup>
+        {/if}
+        {#if splitFunctions.nonpayable.length}
+        <optgroup label="Writeable">
+          {#each splitFunctions.nonpayable as f}
+          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          {/each}
+        </optgroup>
+        {/if}
+        {#if splitFunctions.readonly.length}
+        <optgroup label="Readable">
+          {#each splitFunctions.readonly as f}
+          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          {/each}
+        </optgroup>
+        {/if}
       </select>
     </label>
   </section>
