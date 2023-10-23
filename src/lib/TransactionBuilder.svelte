@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { ethers } from "ethers";
-  import { whatsabi } from "@shazow/whatsabi";
+  import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
@@ -51,6 +51,14 @@
     name: string,
   };
   let loading : Record<string, boolean> = {};
+
+  const abiLoader = new loaders.MultiABILoader([
+    new loaders.SourcifyABILoader(),
+    new loaders.EtherscanABILoader({
+      // TODO: Move to config container
+      apiKey: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
+    }),
+  ]);
 
   onMount(async () => {
     // Load hint?
@@ -183,7 +191,8 @@
     loading.to = true;
     try {
       r = await whatsabi.autoload(to, {
-        provider: provider,
+        provider,
+        abiLoader,
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
       });
