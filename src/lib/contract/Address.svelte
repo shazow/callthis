@@ -9,12 +9,16 @@
   export let readonly = false;
   export let required = false;
   export let name = "";
-  export let value = "";
   export let resolved = "";
+  export let value = resolved;
+
   export const methods = {
     async resolve(target: any): Promise<string> {
       error = "";
-      if (!value) return "";
+      if (!value) {
+        resolved = "";
+        return "";
+      }
       try {
         loading = true;
         resolved = await resolver(value);
