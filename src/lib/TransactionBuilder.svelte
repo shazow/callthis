@@ -273,7 +273,8 @@
     editing = false;
   }
 
-  function onInputsChanged(context: { calldata: string, values: string[], resolved: string[] }) {
+  function onInputsChanged(event: CustomEvent) {
+    const context = event.detail as { calldata: string, values: string[], resolved: string[] };
     calldata = context.calldata;
     functionArgs = context.values;
   }
