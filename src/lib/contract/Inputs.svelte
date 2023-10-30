@@ -14,12 +14,20 @@ export let resolver : (addr: string) => Promise<string>;
 
 const dispatch = createEventDispatcher();
 
-function onChange() {
+function onChange(event: Event) {
   const args = values.map((v, i) => {
     return resolved[i] || v;
   });
-  const calldata = abi.encodeFunctionData(fragment, args);
-  dispatch("change", {calldata, values, resolved: args});
+  const target = event.target as HTMLInputElement;
+  try {
+    const calldata = abi.encodeFunctionData(fragment, args);
+    target.setCustomValidity("");
+    dispatch("change", {calldata, values, resolved: args});
+  } catch (err: any) {
+    const msg = err.message;
+    console.error("Field encoding error: " + msg);
+    target.setCustomValidity(msg);
+  }
 }
 </script>
 
