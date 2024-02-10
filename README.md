@@ -6,7 +6,7 @@
 
 ---
 
-Latest version is available on [callthis.link](https://callthis.link) and on IPFS via [callthis.eth](https://callthis.eth.link).
+Latest version is available on [callthis.link](https://callthis.link) and on IPFS via [callthis.eth](https://callthis.eth.limo).
 
 ✨ Automagic proxy resolving and ABI detection is powered by [WhatsABI](https://github.com/shazow/whatsabi)!
 
