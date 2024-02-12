@@ -23,6 +23,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@safe-global/safe-apps-provider": "^0.18.2",
+		"@safe-global/safe-apps-sdk": "^9.0.0",
 		"@shazow/whatsabi": "^0.9.1",
 		"@walletconnect/ethereum-provider": "^2.10.2",
 		"@walletconnect/modal": "^2.6.2",

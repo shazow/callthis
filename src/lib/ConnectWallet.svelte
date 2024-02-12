@@ -8,6 +8,9 @@
   import { EthereumProvider } from "@walletconnect/ethereum-provider";
   import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
 
+  import { SafeAppProvider } from '@safe-global/safe-apps-provider';
+  import SafeAppsSDK from '@safe-global/safe-apps-sdk';
+
   interface InjectedProvider {
     enable?: () => Promise<string[]>;
     request?: (request: { method: string }) => Promise<string[]>;
@@ -62,9 +65,13 @@
   }
 
   // FIXME: The call flow to here is janky, need to refactor
-  export async function connect(force: "walletconnect"|"injected"|"any", provider?: any) {
-    // Check for injected wallet
-    if (force !== "walletconnect") {
+  export async function connect(force: "walletconnect"|"injected"|"safe"|"any", provider?: any, account?: string) {
+    if (force === "safe") {
+      accounts = account ? [account] : [];
+      dispatch("connect", { provider: provider, accounts });
+      return;
+    } else if (force !== "walletconnect") {
+      // Check for injected wallet
       const injected = (window as EthereumWindow).ethereum as InjectedProvider;
       if (injected) {
         accounts = (await requestAccounts(injected)) || [];
@@ -117,6 +124,18 @@
 
   onMount(async () => {
     // Resume wallet sessions?
+
+    if (window?.parent !== window) {
+      // Inside a Safe iframe
+      const sdk = new SafeAppsSDK();
+      const safe = await Promise.race([
+          sdk.safe.getInfo(),
+          new Promise<undefined>((resolve) => setTimeout(resolve, 200))
+      ]);
+      if (safe) {
+        return connect("safe", new SafeAppProvider(safe, sdk), safe.safeAddress);
+      }
+    }
 
     // TODO: Make provider reactive so we can inject a new wallet connect config later, so users can BYO configs
     const walletconnect = await EthereumProvider.init(config as EthereumProviderOptions);
