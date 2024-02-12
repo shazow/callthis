@@ -129,7 +129,7 @@
       // Inside a Safe iframe
       const sdk = new SafeAppsSDK();
       const safe = await Promise.race([
-          sdk.safe.getInfo(),
+          sdk.safe.getInfo(), // Apparently this can hang indefinitely so we have to race against a timeout
           new Promise<undefined>((resolve) => setTimeout(resolve, 200))
       ]);
       if (safe) {
