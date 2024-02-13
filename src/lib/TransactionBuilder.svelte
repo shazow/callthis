@@ -274,8 +274,8 @@
   }
 
   function onInputsChanged(event: CustomEvent) {
-    const context = event.detail as { calldata: string, values: string[], resolved: string[] };
-    calldata = context.calldata;
+    const context = event.detail as { values: string[], resolved: string[] };
+    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
     functionArgs = context.values;
   }
 
@@ -361,7 +361,7 @@
   {/if}
 
   {#if selectedFragment}
-  <Inputs abi={abi} fragment={selectedFragment} values={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
+  <Inputs inputs={selectedFragment.inputs} values={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
   {/if}
 
   {#if calldata || editing}

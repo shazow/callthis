@@ -5,36 +5,43 @@ import type { ethers } from "ethers";
 
 import Address from "./Address.svelte";
 
-export let abi : ethers.Interface;
-export let fragment : ethers.FunctionFragment;
+export let inputs : ethers.ParamType[];
 export let values : any[] = [];
 export let resolved : any[] = [];
 export let resolver : (addr: string) => Promise<string>;
 
-
 const dispatch = createEventDispatcher();
 
-function onChange(event: Event) {
+export let onChange = function(event: Event) {
   const args = values.map((v, i) => {
     return resolved[i] || v;
   });
   const target = event.target as HTMLInputElement;
   try {
-    const calldata = abi.encodeFunctionData(fragment, args);
     target.setCustomValidity("");
-    dispatch("change", {calldata, values, resolved: args});
+    dispatch("change", {values, resolved: args});
   } catch (err: any) {
     const msg = err.message;
     console.error("Field encoding error: " + msg);
     target.setCustomValidity(msg);
   }
 }
+
+// TODO: Need to construct a separate datastructure that maintains { value,
+// type } pairs, so that dynamically sized arrays can be added independently of
+// mutating the ParamType tree.
+
 </script>
 
+{#if inputs && inputs.length > 0}
 <div class="inputs">
-  {#each fragment?.inputs as input, i}
+  {#each inputs as input, i}
   <section class="input">
-    {#if input.baseType === "tuple" || input.baseType === "array" }
+    {#if input.baseType === "tuple" }
+    <!-- <svelte:self onChange={ onChange } resolver={ resolver } bind:values={ values[i] } bind:resolved={ resolved[i] } inputs={ input.components } /> -->
+    <input type="text" placeholder="Unsupported type: {input.type}" disabled />
+    {:else if input.baseType === "array" }
+    <!-- <svelte:self onChange={ onChange } resolver={ resolver } bind:values={ values[i] } bind:resolved={ resolved[i] } inputs={ input.arrayChildren.components } /> -->
     <input type="text" placeholder="Unsupported type: {input.type}" disabled />
     {:else if input.baseType === "address"}
     <Address required resolver={ resolver } bind:value={ values[i] } bind:resolved={ resolved[i] } on:change={ onChange }><span>{input.name}</span></Address>
@@ -46,3 +53,4 @@ function onChange(event: Event) {
   </section>
   {/each}
 </div>
+{/if}
