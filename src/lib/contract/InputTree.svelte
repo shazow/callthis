@@ -6,7 +6,8 @@
   import { fromParamType, toValues } from "./param.js";
   import Input from "./Input.svelte";
 
-  export let inputs: ethers.ParamType[];
+  export let inputs: readonly ethers.ParamType[];
+  export let initialValues: string[] = []; // XXX:
 
   $: params = inputs.map((t) => fromParamType(t));
   $: values = params.map((p) => toValues(p));
@@ -16,9 +17,7 @@
   const dispatch = createEventDispatcher();
 
   export let onChange = function(event: Event) {
-    const args = values.map((v, i) => {
-      return resolved[i] || v;
-    });
+    const args = values;
     const target = event.target as HTMLInputElement;
     try {
       target.setCustomValidity("");

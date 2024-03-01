@@ -7,7 +7,7 @@
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
   import Value from '$lib/contract/Value.svelte';
-  import Inputs from '$lib/contract/Inputs.svelte';
+  import InputTree from '$lib/contract/InputTree.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   type PreparedTransaction = {
@@ -361,7 +361,7 @@
   {/if}
 
   {#if selectedFragment}
-  <Inputs inputs={selectedFragment.inputs} values={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
+  <InputTree inputs={selectedFragment.inputs} initialValues={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
   {/if}
 
   {#if calldata || editing}
