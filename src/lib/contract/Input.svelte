@@ -5,6 +5,21 @@
   export let input : Param;
 
   export let componentArgs: any = {};
+
+  function extendArray(param: Param): Param {
+    if (!param.childrenExtendType) throw new Error("Param.extendArray: must have childrenExtendType");
+
+    if (param.children === undefined) {
+      param.children = new Array<Param>();
+    }
+
+    param.children = [
+      ...param.children,
+      Object.assign({}, param.childrenExtendType),
+    ];
+    return param;
+  }
+
 </script>
 
 <section class="input">
@@ -13,7 +28,7 @@
       <svelte:self input={ p } componentArgs={ componentArgs } />
     {/each}
     {#if input.childrenExtendType}
-      <button>+</button>
+      <button on:click|preventDefault={ () => { input = extendArray(input) } }>+</button> <span>{input.childrenExtendType.type.baseType}</span>a
     {/if}
   {:else if input.type.baseType === "address"}
     <Address required bind:value={ input.value } bind:resolved={ input.resolved } {...componentArgs}><span>{input.type.name}</span></Address>
