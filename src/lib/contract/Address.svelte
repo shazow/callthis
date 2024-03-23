@@ -9,12 +9,16 @@
   export let readonly = false;
   export let required = false;
   export let name = "";
-  export let value = "";
   export let resolved = "";
+  export let value = resolved;
+
   export const methods = {
     async resolve(target: any): Promise<string> {
       error = "";
-      if (!value) return "";
+      if (!value) {
+        resolved = "";
+        return "";
+      }
       try {
         loading = true;
         resolved = await resolver(value);
@@ -49,13 +53,13 @@
 
 <label class:resolved={resolved}>
   <slot>Address</slot>
+  <aside>Address</aside>
   <input
     type="text"
     bind:this={el}
     on:input={debouncer(inputHandler)}
     bind:value
     pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"}
-    placeholder="Address"
     {name}
     {disabled}
     {readonly}

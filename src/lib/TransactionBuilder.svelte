@@ -7,6 +7,7 @@
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
   import Value from '$lib/contract/Value.svelte';
+  import InputTree from '$lib/contract/InputTree.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   type PreparedTransaction = {
@@ -272,8 +273,10 @@
     editing = false;
   }
 
-  function updateCalldata() {
-    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, functionArgs) || "";
+  function onInputsChanged(event: CustomEvent) {
+    const context = event.detail as { values: string[], resolved: string[] };
+    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
+    functionArgs = context.values;
   }
 
   type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
@@ -358,17 +361,9 @@
   {/if}
 
   {#if selectedFragment}
-  {#each selectedFragment.inputs as input, i}
-  <section class="input">
-    {#if input.baseType === "tuple" || input.baseType === "array" }
-    <input type="text" placeholder="Unsupported type: {input.type}" disabled />
-    {:else}
-    <span class="input-name">{input.name}</span>
-    <input type="text" bind:value={functionArgs[i]} required on:change={ updateCalldata }/>
-    <aside>{input.type}</aside>
-    {/if}
+  <section class="inputs">
+    <InputTree inputs={selectedFragment.inputs} initialValues={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
   </section>
-  {/each}
   {/if}
 
   {#if calldata || editing}
