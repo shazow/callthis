@@ -53,13 +53,13 @@
 
 <label class:resolved={resolved}>
   <slot>Address</slot>
+  <aside>Address</aside>
   <input
     type="text"
     bind:this={el}
     on:input={debouncer(inputHandler)}
     bind:value
     pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"}
-    placeholder="Address"
     {name}
     {disabled}
     {readonly}

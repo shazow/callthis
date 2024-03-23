@@ -28,35 +28,31 @@
 
 </script>
 
+{#if input.children }
 <details open class="input">
-  <summary>{input.type.name} ({input.type.baseType})</summary>
-  {#if input.children }
-    {#each input.children as p}
-      <svelte:self input={ p } componentArgs={ componentArgs } />
-    {/each}
+  <summary><span class="type">{input.type.name} {input.type.baseType}</span></summary>
+  {#each input.children as p}
+    <svelte:self input={ p } componentArgs={ componentArgs } />
+  {/each}
 
-    {#if input.childrenExtendType}
-      <button on:click|preventDefault={ () => { input = extendArray(input) } }>+</button>
-      <button on:click|preventDefault={ () => { input = shrinkArray(input) } } disabled={ !input.children.length }>-</button>
-      <span>{input.childrenExtendType.type.format()}</span>
-    {/if}
-
-  {:else if input.type.baseType === "address"}
-    <Address required bind:value={ input.value } bind:resolved={ input.resolved } {...componentArgs}><span>{input.type.name}</span></Address>
-
-  {:else}
-    <input type="text" required bind:value={ input.value } {...componentArgs} />
-    <aside>{input.type.baseType}</aside>
+  {#if input.childrenExtendType}
+    <p class="type">{input.childrenExtendType.type.format("full")}</p>
+    <button on:click|preventDefault={ () => { input = extendArray(input) } }>+</button>
+    <button on:click|preventDefault={ () => { input = shrinkArray(input) } } disabled={ !input.children.length }>-</button>
   {/if}
 </details>
 
-<style lang="scss">
-details {
-  margin-left: 1em;
-  margin-bottom: 0.5em;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-}
+{:else if input.type.baseType === "address"}
+  <Address required bind:value={ input.value } bind:resolved={ input.resolved } {...componentArgs}><span>{input.type.name}</span></Address>
 
+{:else}
+  <label>
+    <span>{input.type.name}</span>
+    <aside class="type">{input.type.baseType}</aside>
+    <input type="text" required bind:value={ input.value } {...componentArgs} /> </label>
+{/if}
+
+<style lang="scss">
 button {
   width: initial;
 }

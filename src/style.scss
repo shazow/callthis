@@ -119,12 +119,42 @@ h2 {
 
   aside {
     position: absolute;
-    right: 5px;
+    margin: 0.7em 0.5em;
+    right: 0;
+    color: #999;
+    background: inherit;
+    opacity: 0.8;
   }
 
   .invalid {
     text-align: center;
     color: rgba(200, 30, 30, 0.8);
+  }
+}
+
+.inputs {
+  details {
+    margin-left: 1em;
+    margin-bottom: 0.5em;
+  }
+  summary {
+    margin-bottom: 0.5em;
+  }
+  .type {
+    font-weight: bold;
+    font-family: monospace;
+  }
+  label {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 0.5em;
+
+    &> span {
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
   }
 }
 

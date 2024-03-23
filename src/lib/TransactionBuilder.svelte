@@ -361,7 +361,9 @@
   {/if}
 
   {#if selectedFragment}
-  <InputTree inputs={selectedFragment.inputs} initialValues={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
+  <section class="inputs">
+    <InputTree inputs={selectedFragment.inputs} initialValues={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
+  </section>
   {/if}
 
   {#if calldata || editing}
