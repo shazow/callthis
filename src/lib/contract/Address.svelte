@@ -122,6 +122,11 @@
       border-radius: 0px 0px 5px 5px;
       border-left: var(--resolved-border);
       border-right: var(--resolved-border);
+      margin-left: 0;
+
+      summary {
+        margin-bottom: 0;
+      }
 
       p {
         margin: 1em;
