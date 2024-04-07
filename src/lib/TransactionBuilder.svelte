@@ -96,7 +96,8 @@
 
   function resolver(value: string): Promise<string> {
     log.info(`Resolving address: ${value}`);
-    const r = ethers.resolveAddress(value, provider);
+    // TODO: Resolve relative to some chainID?
+    const r = ethers.resolveAddress(value, defaultProvider);
     if (r instanceof Promise) return r;
     return Promise.resolve(r);
   };
@@ -274,6 +275,11 @@
   }
 
   function onInputsChanged(event: CustomEvent) {
+    if (!form.checkValidity()) {
+      calldata = "";
+      form.reportValidity();
+      return;
+    }
     const context = event.detail as { values: string[], resolved: string[] };
     calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
     functionArgs = context.values;
@@ -437,10 +443,6 @@
     font-weight: bold;
     font-style: italic;
     color: rgba(0, 100, 185, 0.5);
-  }
-  section.input {
-    padding-left: 1rem;
-    border-left: 0.5rem solid rgba(35,80,180,0.3);
   }
   .input-name {
     text-transform: initial;

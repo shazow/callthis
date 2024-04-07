@@ -43,13 +43,13 @@
 </details>
 
 {:else if input.type.baseType === "address"}
-  <Address required bind:value={ input.value } bind:resolved={ input.resolved } {...componentArgs}><span>{input.type.name}</span></Address>
+  <Address required bind:value={ input.value } bind:resolved={ input.resolved } resolver={ componentArgs.resolver } on:change={ componentArgs.onChange }><span>{input.type.name}</span></Address>
 
 {:else}
   <label>
     <span>{input.type.name}</span>
     <aside class="type">{input.type.baseType}</aside>
-    <input type="text" required bind:value={ input.value } {...componentArgs} /> </label>
+    <input type="text" required on:change={ componentArgs.onChange } bind:value={ input.value } /> </label>
 {/if}
 
 <style lang="scss">

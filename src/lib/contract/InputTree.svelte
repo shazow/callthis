@@ -10,18 +10,20 @@
   export let initialValues: string[] = []; // XXX:
 
   $: params = inputs.map((t) => fromParamType(t));
-  $: values = params.map((p) => toValues(p));
+
+  // XXX: $: valuesWithDefaults??
+  console.log("XXX", initialValues);
 
   export let resolver : (addr: string) => Promise<string>;
 
   const dispatch = createEventDispatcher();
 
   export let onChange = function(event: Event) {
-    const args = values;
-    const target = event.target as HTMLInputElement;
+    const args = params.map((p) => toValues(p));
+    const target : HTMLInputElement = event.target || (event as CustomEvent).detail.target;
     try {
       target.setCustomValidity("");
-      dispatch("change", {values, resolved: args});
+      dispatch("change", {args, resolved: args});
     } catch (err: any) {
       const msg = err.message;
       console.error("Field encoding error: " + msg);
@@ -31,7 +33,7 @@
 
   const componentArgs = {
     resolver,
-    "on:change": onChange,
+    onChange,
   };
 </script>
 

@@ -2,6 +2,8 @@
   import { debouncer } from "$lib/helpers";
   import { createEventDispatcher } from "svelte";
 
+  const dispatch = createEventDispatcher();
+
   type Resolver = (addr: string) => Promise<string>;
 
   export let resolver: Resolver = (_: string) => Promise.resolve("");
@@ -40,8 +42,6 @@
   let was = "";
   let error = "";
   let loading = false;
-
-  const dispatch = createEventDispatcher();
 
   async function inputHandler(event: Event) {
     resolved = "";
