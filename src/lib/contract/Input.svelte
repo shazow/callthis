@@ -1,30 +1,11 @@
 <script lang="ts">
   import type { Param } from "./param.js";
+  import { extendArray, shrinkArray } from "./param.js";
   import Address from "./Address.svelte";
 
   export let input : Param;
 
   export let componentArgs: any = {};
-
-  function extendArray(param: Param): Param {
-    if (!param.childrenExtendType) throw new Error("Param.extendArray: must have childrenExtendType");
-
-    if (param.children === undefined) {
-      param.children = new Array<Param>();
-    }
-
-    param.children = [
-      ...param.children,
-      Object.assign({}, param.childrenExtendType),
-    ];
-    return param;
-  }
-
-  function shrinkArray(param: Param): Param {
-    if (!param.children) throw new Error("Param.shrinkArray: must have children");
-    param.children.pop();
-    return param;
-  }
 
 </script>
 

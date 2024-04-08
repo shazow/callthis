@@ -3,16 +3,18 @@
 
   import type { ethers } from "ethers";
 
-  import { fromParamType, toValues } from "./param.js";
+  import { fromParamType, toValues, setValues } from "./param.js";
   import Input from "./Input.svelte";
 
   export let inputs: readonly ethers.ParamType[];
-  export let initialValues: string[] = []; // XXX:
+  export let initialValues: string[] = [];
 
-  $: params = inputs.map((t) => fromParamType(t));
-
-  // XXX: $: valuesWithDefaults??
-  console.log("XXX", initialValues);
+  $: params = inputs.map((t: ethers.ParamType, idx: number) => {
+    const p = fromParamType(t)
+    const v = initialValues[idx];
+    if (v) setValues(p, v);
+    return p;
+  });
 
   export let resolver : (addr: string) => Promise<string>;
 

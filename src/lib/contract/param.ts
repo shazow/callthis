@@ -41,3 +41,49 @@ export function toValues(param: Param): Array<any> {
   if (param.children === undefined) throw new Error("invalid Param: must contain value or children: " + JSON.stringify(param));
   return param.children.map((c) => toValues(c));
 }
+
+export function extendArray(param: Param): Param {
+  if (!param.childrenExtendType) throw new Error("extendArray: must have childrenExtendType");
+
+  if (param.children === undefined) {
+    param.children = new Array<Param>();
+  }
+
+  param.children = [
+    ...param.children,
+    Object.assign({}, param.childrenExtendType),
+  ];
+  return param;
+}
+
+export function shrinkArray(param: Param): Param {
+  if (!param.children) throw new Error("shrinkArray: must have children");
+  param.children.pop();
+  return param;
+}
+
+
+export function setValues(param: Param, value: any): void {
+  if (!value) return;
+
+  if (param.type.isArray()) {
+    if (!Array.isArray(value)) return;
+
+    for (let i = 0; i < value.length; i++) {
+      extendArray(param);
+      if (!param.children) throw new Error ("setValues: array param must have children");
+      setValues(param.children[i], value[i]);
+    }
+
+  } else if (param.type.isTuple()) {
+    if (!Array.isArray(value)) return;
+
+    for (let i = 0; i < value.length; i++) {
+      if (!param.children) throw new Error ("setValues: tuple param must match children of value array");
+      setValues(param.children[i], value[i]);
+    }
+  } else {
+    param.value = value;
+  }
+}
+
