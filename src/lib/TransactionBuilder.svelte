@@ -107,6 +107,7 @@
       log.info("Already submitting, ignored new submit");
       return;
     }
+    result = null;
     preparedTx = null;
     log.info("Submitting preview transaction", { from, toResolved, calldata, value });
 

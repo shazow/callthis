@@ -11,7 +11,7 @@
 
   $: params = inputs.map((t: ethers.ParamType, idx: number) => {
     const p = fromParamType(t)
-    const v = initialValues[idx];
+    const v = initialValues && initialValues[idx];
     if (v) setValues(p, v);
     return p;
   });
