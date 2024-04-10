@@ -3,6 +3,7 @@
   import { validate, extendArray, shrinkArray } from "./param.js";
   import Address from "./Address.svelte";
   import InputBasic from "./InputBasic.svelte";
+  import InputBytes from "./InputBytes.svelte";
 
   export let input : Param;
 
@@ -26,6 +27,17 @@
 
 {:else if input.type.baseType === "address"}
   <Address required bind:value={ input.value } bind:resolved={ input.resolved } resolver={ componentArgs.resolver } on:change={ componentArgs.onChange }><span>{input.type.name}</span></Address>
+
+{:else if input.type.type.startsWith("bytes")}
+  <InputBytes
+    on:change={ componentArgs.onChange }
+    bind:value={ input.value }
+    validate={(v) => validate(input.type, v)}
+    bytes={ Number(input.type.type.slice("bytes".length)) }
+    >
+    <span>{input.type.name}</span>
+    <aside class="type">{input.type.baseType}</aside>
+  </InputBytes>
 
 {:else}
   <InputBasic
