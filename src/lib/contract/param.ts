@@ -1,4 +1,6 @@
-import type { ethers } from "ethers";
+import { ethers } from "ethers";
+
+// TODO: Convert to class?
 
 export type Param = {
   type: ethers.ParamType;
@@ -11,6 +13,15 @@ export type Param = {
   children?: Array<Param>;
   childrenExtendType?: Param; // Only present for extendable arrays
 };
+
+export function validate(type: ethers.ParamType, value: any): string {
+  try {
+    const r = ethers.AbiCoder.defaultAbiCoder().encode([type], [value]);
+  } catch (err: any) {
+    return err.shortMessage;
+  }
+  return "";
+}
 
 export function fromParamType(type: ethers.ParamType, parent?: Param): Param {
   const p: Param = {

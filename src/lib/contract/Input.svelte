@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Param } from "./param.js";
-  import { extendArray, shrinkArray } from "./param.js";
+  import { validate, extendArray, shrinkArray } from "./param.js";
   import Address from "./Address.svelte";
+  import InputBasic from "./InputBasic.svelte";
 
   export let input : Param;
 
@@ -27,10 +28,14 @@
   <Address required bind:value={ input.value } bind:resolved={ input.resolved } resolver={ componentArgs.resolver } on:change={ componentArgs.onChange }><span>{input.type.name}</span></Address>
 
 {:else}
-  <label>
+  <InputBasic
+    on:change={ componentArgs.onChange }
+    bind:value={ input.value }
+    validate={(v) => validate(input.type, v)}
+    >
     <span>{input.type.name}</span>
     <aside class="type">{input.type.baseType}</aside>
-    <input type="text" required on:change={ componentArgs.onChange } bind:value={ input.value } /> </label>
+  </InputBasic>
 {/if}
 
 <style lang="scss">

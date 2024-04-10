@@ -121,9 +121,8 @@ h2 {
     position: absolute;
     margin: 0.7em 0.5em;
     right: 0;
-    color: #999;
-    background: inherit;
-    opacity: 0.8;
+    color: rgba(0, 0, 0, 0.3);
+    padding-left: 0.3em;
   }
 
   .invalid {
