@@ -430,9 +430,11 @@
 
 {#if !to}
 <section class="example">
-  <p>
-    <strong>Example:</strong> <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to callthis.eth</a> 🥹
-  </p>
+  <h3>Examples</h3>
+  <ul>
+    <li>🥹 <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to <code>callthis.eth</code></a></li>
+    <li>💰 <a href="/?data=0x70a08231000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045&to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&hint=balanceOf%28address%29">Call <code>USDC.balanceOf(vitalik.eth)</code></a></li>
+  </ul>
 </section>
 {/if}
 
