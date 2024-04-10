@@ -119,12 +119,47 @@ h2 {
 
   aside {
     position: absolute;
-    right: 5px;
+    margin: 0.7em 0.5em;
+    right: 0;
+    color: rgba(0, 0, 0, 0.3);
+    padding-left: 0.3em;
   }
 
   .invalid {
     text-align: center;
     color: rgba(200, 30, 30, 0.8);
+  }
+  .error {
+    text-align: center;
+  }
+}
+
+.inputs {
+  details {
+    margin-left: 1em;
+    margin-bottom: 0.5em;
+  }
+  summary {
+    margin-bottom: 0.5em;
+  }
+  .type {
+    font-weight: bold;
+    font-family: monospace;
+  }
+  label {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 0.5em;
+
+    &> span {
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    input[type="text"] {
+      padding-right: 5em;
+    }
   }
 }
 
@@ -171,14 +206,27 @@ form {
 }
 
 .example {
-  text-align: center;
+  border-radius: 1.5em;
+  display: block;
+  width: 20rem;
+  background: rgba(255, 200, 80, 0.5);
+  padding: 0.5em;
+  margin: 0 auto;
 
-  p {
-    border-radius: 5em;
-    display: inline-block;
+  h3 {
+    color: rgb(170, 120, 30);
+    text-align: center;
+    margin: 0.5em 0;
+  }
+
+  ul {
     font-weight: bold;
-    padding: 1em 1.5em;
-    background: rgba(255, 200, 80, 0.5);
+    padding: 0;
+  }
+
+  li {
+    list-style: none;
+    margin: 0 1em 0.8em 1em;
   }
 }
 

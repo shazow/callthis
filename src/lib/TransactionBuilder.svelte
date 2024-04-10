@@ -7,6 +7,7 @@
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
   import Value from '$lib/contract/Value.svelte';
+  import InputTree from '$lib/contract/InputTree.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   type PreparedTransaction = {
@@ -95,7 +96,8 @@
 
   function resolver(value: string): Promise<string> {
     log.info(`Resolving address: ${value}`);
-    const r = ethers.resolveAddress(value, provider);
+    // TODO: Resolve relative to some chainID?
+    const r = ethers.resolveAddress(value, defaultProvider);
     if (r instanceof Promise) return r;
     return Promise.resolve(r);
   };
@@ -105,6 +107,7 @@
       log.info("Already submitting, ignored new submit");
       return;
     }
+    result = null;
     preparedTx = null;
     log.info("Submitting preview transaction", { from, toResolved, calldata, value });
 
@@ -272,8 +275,15 @@
     editing = false;
   }
 
-  function updateCalldata() {
-    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, functionArgs) || "";
+  function onInputsChanged(event: CustomEvent) {
+    if (!form.checkValidity()) {
+      calldata = "";
+      form.reportValidity();
+      return;
+    }
+    const context = event.detail as { values: string[], resolved: string[] };
+    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
+    functionArgs = context.values;
   }
 
   type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
@@ -358,17 +368,9 @@
   {/if}
 
   {#if selectedFragment}
-  {#each selectedFragment.inputs as input, i}
-  <section class="input">
-    {#if input.baseType === "tuple" || input.baseType === "array" }
-    <input type="text" placeholder="Unsupported type: {input.type}" disabled />
-    {:else}
-    <span class="input-name">{input.name}</span>
-    <input type="text" bind:value={functionArgs[i]} required on:change={ updateCalldata }/>
-    <aside>{input.type}</aside>
-    {/if}
+  <section class="inputs">
+    <InputTree inputs={selectedFragment.inputs} initialValues={functionArgs} resolver={resolver} on:change={ onInputsChanged } />
   </section>
-  {/each}
   {/if}
 
   {#if calldata || editing}
@@ -428,9 +430,11 @@
 
 {#if !to}
 <section class="example">
-  <p>
-    <strong>Example:</strong> <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to callthis.eth</a> 🥹
-  </p>
+  <h3>Examples</h3>
+  <ul>
+    <li>🥹 <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to <code>callthis.eth</code></a></li>
+    <li>💰 <a href="/?data=0x70a08231000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045&to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&hint=balanceOf%28address%29">Call <code>USDC.balanceOf(vitalik.eth)</code></a></li>
+  </ul>
 </section>
 {/if}
 
@@ -442,10 +446,6 @@
     font-weight: bold;
     font-style: italic;
     color: rgba(0, 100, 185, 0.5);
-  }
-  section.input {
-    padding-left: 1rem;
-    border-left: 0.5rem solid rgba(35,80,180,0.3);
   }
   .input-name {
     text-transform: initial;

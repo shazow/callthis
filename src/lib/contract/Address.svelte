@@ -2,6 +2,8 @@
   import { debouncer } from "$lib/helpers";
   import { createEventDispatcher } from "svelte";
 
+  const dispatch = createEventDispatcher();
+
   type Resolver = (addr: string) => Promise<string>;
 
   export let resolver: Resolver = (_: string) => Promise.resolve("");
@@ -9,12 +11,16 @@
   export let readonly = false;
   export let required = false;
   export let name = "";
-  export let value = "";
   export let resolved = "";
+  export let value = resolved;
+
   export const methods = {
     async resolve(target: any): Promise<string> {
       error = "";
-      if (!value) return "";
+      if (!value) {
+        resolved = "";
+        return "";
+      }
       try {
         loading = true;
         resolved = await resolver(value);
@@ -37,8 +43,6 @@
   let error = "";
   let loading = false;
 
-  const dispatch = createEventDispatcher();
-
   async function inputHandler(event: Event) {
     resolved = "";
     const target = event.target as HTMLInputElement;
@@ -49,13 +53,13 @@
 
 <label class:resolved={resolved}>
   <slot>Address</slot>
+  <aside>Address</aside>
   <input
     type="text"
     bind:this={el}
     on:input={debouncer(inputHandler)}
     bind:value
     pattern={"(0x[a-fA-F0-9]{40})|((\\w+\\.)+\\w+)"}
-    placeholder="Address"
     {name}
     {disabled}
     {readonly}
@@ -118,6 +122,11 @@
       border-radius: 0px 0px 5px 5px;
       border-left: var(--resolved-border);
       border-right: var(--resolved-border);
+      margin-left: 0;
+
+      summary {
+        margin-bottom: 0;
+      }
 
       p {
         margin: 1em;

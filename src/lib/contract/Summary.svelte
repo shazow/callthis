@@ -56,6 +56,7 @@
     font-size: 1rem;
     font-weight: bold;
     margin-bottom: 1em;
+    word-break: break-all;
 
     code {
       background: var(--highlight-background);
