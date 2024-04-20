@@ -53,7 +53,6 @@
 
 <label class:resolved={resolved}>
   <slot></slot>
-<!--  <span class="aside"></span>-->
   <input
     type="text"
     placeholder="Address"
@@ -78,7 +77,7 @@
     {#if el.validity.patternMismatch}
       <div class="invalid">Must be a valid ENS or hex address</div>
     {:else if el.validity.valueMissing}
-<!--      <div class="invalid">Value is required</div>-->
+
     {:else}
       <div class="invalid">{el.validationMessage}</div>
     {/if}

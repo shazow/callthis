@@ -110,8 +110,13 @@ footer {
   padding: 1.25em 1em;
 
   a {
+    display: flex;
+    align-items: center;
     text-decoration: none;
     color: var(--text-color);
+    span {
+      margin-left: 0.2rem;
+    }
   }
 }
 

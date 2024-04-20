@@ -10,7 +10,7 @@
 
 <footer>
   <a target="_blank" href="https://github.com/shazow/callthis">
-    <OpenSourceIcon /> Open Source
+    <OpenSourceIcon /> <span>Open Source</span>
   </a>
 </footer>
 
