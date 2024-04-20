@@ -1,12 +1,37 @@
 :root {
-  --header-background: rgb(255, 200, 80);
-  --header-color: rgba(200,130,0,0.8);
+  --bg-color: rgb(255,255,255);
+  --text-color: rgba(42,42,42);
+
+  --header-bg-color: rgb(255, 200, 80);
+  --header-text-color: rgba(200,130,0,0.8);
   --header-border-bottom: 3px solid rgba(200,130,0,0.3);
 
-  --link-color: var(--header-color);
+  --footer-bg-color: rgba(50, 50, 50, 0.1);
+
+  --link-color: var(--header-text-color);
   --link-color-hover: var(--link-color);
 
   height: 100%;
+}
+
+[data-theme = "dark"] {
+  --bg-color: rgb(42,42,48);
+  --text-color: rgb(239, 236, 232);
+
+  --header-bg-color: rgba(200,130,0,0.8);
+  --header-text-color: rgb(255, 200, 80);
+  --header-border-bottom: 3px solid rgba(59, 43, 12, 0.3);
+
+  --footer-bg-color: rgba(178, 176, 176, 0.1);
+
+  --link-color: var(--header-text-color);
+  --link-color-hover: var(--link-color);
+
+  input,textarea {
+    &:disabled {
+      color: rgb(155, 153, 153);
+    }
+  }
 }
 
 @media (max-width: 34rem) {
@@ -21,7 +46,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: rgb(42,42,42);
+  color: var(--text-color);
+  background: var(--bg-color);
 }
 
 .container {
@@ -44,8 +70,8 @@ a {
 main {
   margin: 0 auto;
   width: 34rem;
-  flex-grow: 1;
   flex: 1 0 auto;
+  flex-grow: 1;
 }
 
 header {
@@ -56,13 +82,13 @@ header {
   margin: 0;
 
   font-weight: bold;
-  background: var(--header-background);
-  color: var(--header-color);
+  background: var(--header-bg-color);
+  color: var(--header-text-color);
   border-bottom: var(--header-border-bottom);
 
   a, a:hover {
     text-decoration: none;
-    color: var(--header-color);
+    color: var(--header-text-color);
   }
 }
 
@@ -75,7 +101,7 @@ header h1 {
 }
 
 footer {
-  background: rgba(50, 50, 50, 0.1);
+  background: var(--footer-bg-color);
   box-sizing: border-box;
   width: 100%;
   flex-shrink: 0;
@@ -85,7 +111,7 @@ footer {
 
   a {
     text-decoration: none;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--text-color);
   }
 }
 
@@ -106,23 +132,15 @@ h2 {
     width: 100%;
   }
 
-  div, aside, h2 {
+  div, h2 {
     flex-basis: 100%;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--text-color);
     font-weight: bold;
     font-size: 0.8rem;
     text-transform: uppercase;
     display: block;
     line-height: 1.5em;
     margin: 0;
-  }
-
-  aside {
-    position: absolute;
-    margin: 0.7em 0.5em;
-    right: 0;
-    color: rgba(0, 0, 0, 0.3);
-    padding-left: 0.3em;
   }
 
   .invalid {
@@ -169,7 +187,7 @@ button, input[type="submit"] {
   cursor: pointer;
 
   &:hover {
-    background-color: var(--header-background);
+    background-color: var(--header-bg-color);
   }
 }
 
@@ -201,7 +219,7 @@ input[type=text], textarea, select {
 form {
   margin: 2rem 0;
   padding: 0.5em;
-  background: rgb(255, 255, 255);
+  background: var(--bg-color);
   border-radius: 5px;
 }
 
@@ -214,7 +232,7 @@ form {
   margin: 0 auto;
 
   h3 {
-    color: rgb(170, 120, 30);
+    color: rgb(105, 72, 4);
     text-align: center;
     margin: 0.5em 0;
   }
@@ -235,13 +253,6 @@ form {
 }
 
 // Icons borrowed from https://iconify.design/
-
-.icon-oss {
-  background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="16" height="16" viewBox="0 0 16 16"%3E%3Cpath fill="currentColor" d="M15.698 7.287L8.712.302a1.03 1.03 0 0 0-1.457 0l-1.45 1.45l1.84 1.84a1.223 1.223 0 0 1 1.55 1.56l1.773 1.774a1.224 1.224 0 0 1 1.267 2.025a1.226 1.226 0 0 1-2.002-1.334L8.58 5.963v4.353a1.226 1.226 0 1 1-1.008-.036V5.887a1.226 1.226 0 0 1-.666-1.608L5.093 2.465l-4.79 4.79a1.031 1.031 0 0 0 0 1.457l6.986 6.986a1.03 1.03 0 0 0 1.457 0l6.953-6.953a1.03 1.03 0 0 0 0-1.458"%2F%3E%3C%2Fsvg%3E');
-  background-repeat: no-repeat;
-  padding-left: 24px;
-  background-position: left bottom;
-}
 
 .icon-loading {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cg fill="none" stroke="%233296ff" stroke-linecap="round" stroke-width="2"%3E%3Cpath stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"%3E%3Canimate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60%3B0"%2F%3E%3C%2Fpath%3E%3Cpath stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"%3E%3Canimate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15%3B0"%2F%3E%3CanimateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12%3B360 12 12"%2F%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E');
@@ -274,4 +285,8 @@ form {
     float: left;
     content: "💾";
   }
+}
+
+.text-dark {
+
 }
