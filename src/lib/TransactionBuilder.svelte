@@ -323,7 +323,8 @@
   </section>
 
   <section>
-    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+    <h2>To</h2>
+    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress } />
   </section>
 
   {#if loading.to}
@@ -377,7 +378,7 @@
   <section>
     <label>
       <h2>Calldata</h2>
-      <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled />
+      <textarea name="calldata" bind:value={calldata} placeholder="0x" disabled></textarea>
     </label>
   </section>
   {/if}

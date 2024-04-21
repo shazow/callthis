@@ -52,10 +52,10 @@
 </script>
 
 <label class:resolved={resolved}>
-  <slot>Address</slot>
-  <aside>Address</aside>
+  <slot></slot>
   <input
     type="text"
+    placeholder="Address"
     bind:this={el}
     on:input={debouncer(inputHandler)}
     bind:value
@@ -77,6 +77,7 @@
     {#if el.validity.patternMismatch}
       <div class="invalid">Must be a valid ENS or hex address</div>
     {:else if el.validity.valueMissing}
+
     {:else}
       <div class="invalid">{el.validationMessage}</div>
     {/if}
@@ -102,7 +103,17 @@
     font-family: monospace;
     width: 100%;
     line-height: 1.5em;
+
   }
+
+  ::placeholder {
+     font-weight: bold;
+     text-transform: uppercase;
+     font-size: 0.8rem;
+     line-height: 1.5em;
+     text-align: right;
+   }
+
   .resolved {
     input {
       margin-bottom: 0;
