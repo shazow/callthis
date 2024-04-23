@@ -1,31 +1,49 @@
 <script lang="ts">
   import Moon from './icons/moon.svelte';
   import Sun from './icons/sun.svelte';
+  import {onMount} from "svelte";
 
-  let currentTheme = "light";
+  let currentTheme;
+
+  onMount(() => {
+    const theme = document.documentElement.dataset.theme;
+    const userPrefersDarkMode = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    if (theme) {
+      setTheme(theme == 'light' ? 'light' : 'dark');
+      return;
+    } else setTheme(userPrefersDarkMode ? "dark" : "light");
+  })
 
   const setTheme = (theme) => {
     currentTheme = theme;
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.dataset.theme = theme;
+    document.cookie = `theme=${theme};max-age=31536000;path="/"`;
   };
 </script>
 
 <div class="theme-btn">
   {#if currentTheme === "light"}
-    <span class="moon" on:click={() => setTheme("dark")}>
+    <button class="moon" on:click={() => setTheme("dark")}>
       <Moon />
-    </span>
+    </button>
   {:else}
-    <span class="sun" on:click={() => setTheme("light")}>
+    <button class="sun" on:click={() => setTheme("light")}>
       <Sun />
-    </span>
+    </button>
   {/if}
 </div>
 
 <style lang="scss">
   .theme-btn {
     position: absolute;
-    top: 1.2rem; right: 2.5rem;
+    top: 0.8rem; right: 2.5rem;
     display: inline-block;
+    button {
+      color: inherit;
+      background: transparent;
+      outline: none; border: none;
+    }
   }
 </style>
