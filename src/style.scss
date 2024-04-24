@@ -1,45 +1,11 @@
-:root {
-  --bg-color: rgb(255,255,255);
-  --text-color: rgba(42,42,42);
 
-  --header-bg-color: rgb(255, 200, 80);
-  --header-text-color: rgba(200,130,0,0.8);
-  --header-border-bottom: 3px solid rgba(200,130,0,0.3);
-
-  --footer-bg-color: rgba(50, 50, 50, 0.1);
-
-  --link-color: var(--header-text-color);
-  --link-color-hover: var(--link-color);
-
-  height: 100%;
-}
-
-[data-theme = "dark"] {
-  --bg-color: rgb(42,42,48);
-  --text-color: rgb(239, 236, 232);
-
-  --header-bg-color: rgba(200,130,0,0.8);
-  --header-text-color: rgb(255, 200, 80);
-  --header-border-bottom: 3px solid rgba(59, 43, 12, 0.3);
-
-  --footer-bg-color: rgba(178, 176, 176, 0.1);
-
-  --link-color: var(--header-text-color);
-  --link-color-hover: var(--link-color);
-
-  input,textarea {
-    &:disabled {
-      color: rgb(155, 153, 153);
-    }
-  }
-}
+@import "theme";
 
 @media (max-width: 34rem) {
   :root {
     font-size: 0.7rem;
   }
 }
-
 
 body {
   height: 100%;
