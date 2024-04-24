@@ -1,4 +1,3 @@
-
 [data-theme = "light"] {
   --bg-color: rgb(255,255,255);
   --text-color: rgba(42,42,42);
@@ -11,8 +10,6 @@
 
   --link-color: var(--header-text-color);
   --link-color-hover: var(--link-color);
-
-  height: 100%;
 }
 
 [data-theme = "dark"] {
