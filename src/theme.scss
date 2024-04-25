@@ -1,6 +1,7 @@
 [data-theme = "light"] {
   --bg-color: rgb(255,255,255);
   --text-color: rgba(42,42,42);
+  --label-color: rgba(0, 0, 0, 0.5);
 
   --header-bg-color: rgb(255, 200, 80);
   --header-text-color: rgba(200,130,0,0.8);
@@ -8,22 +9,23 @@
 
   --footer-bg-color: rgba(50, 50, 50, 0.1);
 
-  --link-color: var(--header-text-color);
+  --link-color: rgba(200,130,0,1);
   --link-color-hover: var(--link-color);
 }
 
 [data-theme = "dark"] {
-  --bg-color: rgb(42,42,48);
-  --text-color: rgb(239, 236, 232);
+  --bg-color: rgb(0, 0, 0); // Black to be OLED friendly
+  --text-color: rgba(255, 255, 255, 0.7);
+  --label-color: rgba(255, 255, 255, 0.5);
 
-  --header-bg-color: rgba(200,130,0,0.8);
-  --header-text-color: rgb(255, 200, 80);
-  --header-border-bottom: 3px solid rgba(59, 43, 12, 0.3);
+  --header-bg-color: rgb(25, 25, 112);
+  --header-text-color: rgba(255, 200, 80, 0.9);
+  --header-border-bottom: 3px solid rgba(255, 255, 255, 0.1);
 
-  --footer-bg-color: rgba(178, 176, 176, 0.1);
+  --footer-bg-color: rgba(255, 255, 255, 0.1);
 
-  --link-color: var(--header-text-color);
-  --link-color-hover: var(--link-color);
+  --link-color: rgb(140, 180, 255);
+  --link-color-hover: rgba(140, 180, 255, 0.6);
 
   input,textarea {
     &:disabled {

@@ -323,8 +323,7 @@
   </section>
 
   <section>
-    <h2>To</h2>
-    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress } />
+    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
   </section>
 
   {#if loading.to}

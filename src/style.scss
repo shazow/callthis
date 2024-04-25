@@ -106,7 +106,7 @@ h2 {
     width: 100%;
   }
 
-  div, h2 {
+  div, aside, h2 {
     flex-basis: 100%;
     color: var(--text-color);
     font-weight: bold;
@@ -115,6 +115,14 @@ h2 {
     display: block;
     line-height: 1.5em;
     margin: 0;
+  }
+
+  aside {
+    position: absolute;
+    margin: 0.7em 0.5em;
+    right: 0;
+    color: rgba(0, 0, 0, 0.3);
+    padding-left: 0.3em;
   }
 
   .invalid {
@@ -146,7 +154,7 @@ h2 {
 
     &> span {
       font-weight: bold;
-      color: rgba(0, 0, 0, 0.5);
+      color: var(--label-color);
     }
 
     input[type="text"] {
@@ -201,12 +209,12 @@ form {
   border-radius: 1.5em;
   display: block;
   width: 24rem;
-  background: rgba(255, 200, 80, 0.5);
+  background: var(--header-bg-color);
   padding: 0.5em;
   margin: 0 auto;
 
   h3 {
-    color: rgb(105, 72, 4);
+    color: var(--header-text-color);
     text-align: center;
     margin: 0.5em 0;
   }
