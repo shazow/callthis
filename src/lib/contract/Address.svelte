@@ -52,10 +52,10 @@
 </script>
 
 <label class:resolved={resolved}>
-  <slot></slot>
+  <slot>Address</slot>
+  <aside>Address</aside>
   <input
     type="text"
-    placeholder="Address"
     bind:this={el}
     on:input={debouncer(inputHandler)}
     bind:value
@@ -105,14 +105,6 @@
     line-height: 1.5em;
 
   }
-
-  ::placeholder {
-     font-weight: bold;
-     text-transform: uppercase;
-     font-size: 0.8rem;
-     line-height: 1.5em;
-     text-align: right;
-   }
 
   .resolved {
     input {

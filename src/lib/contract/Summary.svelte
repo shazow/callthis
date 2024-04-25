@@ -38,19 +38,18 @@
 
 <style lang="scss">
   :root {
-    --background: rgba(255, 210, 70, 0.3);
-    --border-left: 5px solid rgba(255, 160, 70, 0.8);
+    --border-left: 5px solid rgba(0, 0, 0, 0.2);
 
-    --highlight-background: rgba(255, 210, 70, 0.6);
+    --highlight-background: rgba(255, 255, 255, 0.2);
     --highlight-color: rgba(190, 120, 0, 0.9);
   }
 
   quote {
-    color: rgba(0, 0, 0, 0.8);
+    color: var(--text-color);
     display: block;
     border-left: var(--border-left);
     border-radius: 5px;
-    background: var(--background);
+    background: var(--header-bg-color);
     padding: 0.3em 0.5em;
     line-height: 1.7em;
     font-size: 1rem;
