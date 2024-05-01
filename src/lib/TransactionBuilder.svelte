@@ -67,7 +67,7 @@
       const maybeABI = ethers.Interface.from(["function " + hint]);
       const fn = maybeABI.getFunction(calldata.slice(0, 10));
       if (!fn) return;
-   
+
       selectedFunction = fn.selector;
       abi = maybeABI;
       functions = [fn];
@@ -433,7 +433,7 @@
   <h3>Build a transaction, get a link:</h3>
   <ul>
     <li>🥹 Example: <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to <code>callthis.eth</code></a></li>
-    <li>💰 Example: <a href="/?data=0x70a08231000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045&to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&hint=balanceOf%28address%29">Call <code>USDC.balanceOf(vitalik.eth)</code></a></li>
+    <li>💰 Example: <a href="/?data=0x70a08231000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045&to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&hint=balanceOf(address)%20returns%20(uint256)">Call <code>USDC.balanceOf(vitalik.eth)</code></a></li>
   </ul>
 </section>
 {/if}
