@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { pushState } from '$app/navigation';
   import { ethers } from "ethers";
   import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
@@ -18,12 +18,26 @@
   }
 
   export let config : Config;
-  export let calldata : string;
   export let args : Record<string, string[]>;
-  export let value : string;
-  export let to : string;
-  export let editing : boolean = (to === "");
-  export let hint : string;
+  let calldata : string = "";
+  let value : string = "";
+  let to : string = "";
+  let editing : boolean = (to === "");
+  let hint : string = "";
+
+  export const methods = {
+    async load(params: {calldata: string, value: string, to: string, hint: string}) {
+      calldata = params.calldata;
+      value = params.value;
+      to = params.to;
+      hint = params.hint;
+      editing = (to === "");
+
+      if (calldata.length >= 10 && hint) {
+        await loadHint(hint);
+      }
+    }
+  };
 
   let from : string;
   let toResolved : string;
@@ -61,23 +75,20 @@
     }),
   ]);
 
-  onMount(async () => {
-    // Load hint?
-    if (calldata.length >= 10 && hint) {
-      const maybeABI = ethers.Interface.from(["function " + hint]);
-      const fn = maybeABI.getFunction(calldata.slice(0, 10));
-      if (!fn) return;
+  async function loadHint(hint: string) {
+    const maybeABI = ethers.Interface.from(["function " + hint]);
+    const fn = maybeABI.getFunction(calldata.slice(0, 10));
+    if (!fn) return;
 
-      selectedFunction = fn.selector;
-      abi = maybeABI;
-      functions = [fn];
-      updateFunction();
-      log.info('Loaded partial ABI from hint');
-    }
+    selectedFunction = fn.selector;
+    abi = maybeABI;
+    functions = [fn];
+    updateFunction();
+    log.info('Loaded partial ABI from hint');
 
     if (provider) await toMethods.resolve("mount");
     else if (to) await loadAddress();
-  });
+  }
 
   const log = {
     error(err: Error|string) {
@@ -271,7 +282,7 @@
     }
 
     // TODO: Subscribe to history changes
-    window.history.pushState({}, "link", $page.url);
+    pushState($page.url, state);
     editing = false;
   }
 
