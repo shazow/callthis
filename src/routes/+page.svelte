@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
 
   import TransactionBuilder from '$lib/TransactionBuilder.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
@@ -49,21 +50,23 @@
     }
   }
 
-  let builderMethods : {
-    load(params: Params): Promise<void>,
-  };
+  let transactionBuilder : TransactionBuilder;
 
   // $: params = getParams($page.url.searchParams);
   page.subscribe(({ url }) => {
     const p = getParams(url.searchParams);
     if (JSON.stringify(p) === JSON.stringify(params)) return;
     params = p;
-    if (builderMethods) builderMethods.load(params);
+    transactionBuilder?.load(params);
+  });
+
+  onMount(() => {
+    transactionBuilder?.load(params);
   });
 </script>
 
 <TransactionBuilder
   config={wcConfig}
-  bind:methods={builderMethods}
+  bind:this={transactionBuilder}
   args={params.args}
 />

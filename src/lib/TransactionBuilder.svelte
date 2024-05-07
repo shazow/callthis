@@ -25,22 +25,36 @@
   let editing : boolean = (to === "");
   let hint : string = "";
 
-  export const methods = {
-    async load(params: {calldata: string, value: string, to: string, hint: string}) {
-      calldata = params.calldata;
-      value = params.value;
-      to = params.to;
-      hint = params.hint;
-      editing = (to === "");
+  let resetKey = {};
 
-      if (calldata.length >= 10 && hint) {
-        await loadHint(hint);
-      }
+  export async function load(params: {calldata: string, value: string, to: string, hint: string}) {
+    calldata = params.calldata;
+    value = params.value;
+    to = params.to;
+    hint = params.hint;
+    editing = (to === "");
+    loading = {};
+
+    if (calldata.length >= 10 && hint) {
+      await loadHint(hint);
     }
-  };
+    if (calldata.length <= 2) { // 0x
+      selectedFunction = "";
+      selectedFragment = undefined;
+      functionArgs = [];
+      functions = [];
+    }
+    if (!to) {
+      toResolved = "";
+      resetKey = {}; // Nuke Address element and reinit
+      result = null;
+    }
+  }
 
   let from : string;
   let toResolved : string;
+
+  // TODO: Refactor to use bind:this in the component
   let toMethods : {
     resolve(target:any): Promise<string>,
   };
@@ -146,6 +160,7 @@
     }
 
     loading.submit = true;
+    let stale = false;
     try {
       let r = await provider.call(tx);
       if (selectedFragment && selectedFragment.outputs?.length > 0) {
@@ -158,10 +173,17 @@
         value: r,
       }
       log.info("Loaded result", result);
+
+      stale = tx.to !== toResolved || tx.data !== calldata || tx.value !== ethers.parseEther(value);
+      if (stale) {
+        log.info("Removed stale result:", result);
+        result = null;
+      }
     } catch(err) {
       return log.error(err as Error);
     } finally {
       loading.submit = false;
+      if (stale) return;
       const mutability = selectedFragment?.stateMutability;
       if (mutability !== "view" && mutability != "pure") {
         preparedTx = tx;
@@ -334,7 +356,9 @@
   </section>
 
   <section>
+    {#key resetKey}
     <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+    {/key}
   </section>
 
   {#if loading.to}

@@ -16,6 +16,7 @@
 
   export const methods = {
     async resolve(target: any): Promise<string> {
+    console.log("XXX", "Address", "resolving", value);
       error = "";
       if (!value) {
         resolved = "";
