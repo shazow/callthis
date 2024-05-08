@@ -36,8 +36,6 @@
   };
 
   function getParams(p : URLSearchParams): Params {
-    console.log("XXX: getParams", { p });
-
     const to = p.get("to") || "";
     const calldata = p.get("data") || "";
     const args = {
