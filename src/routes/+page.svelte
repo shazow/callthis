@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
 
   import TransactionBuilder from '$lib/TransactionBuilder.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
@@ -18,9 +19,25 @@
     },
   }
 
-  let editing : boolean = false;
 
-  function getParams(p : URLSearchParams) {
+  type Params = {
+    to: string,
+    calldata: string,
+    args: Record<string, string[]>,
+    value: string,
+    hint: string,
+  };
+  let params : Params = {
+    to: "",
+    calldata: "",
+    args: {},
+    value: "",
+    hint: "",
+  };
+
+  function getParams(p : URLSearchParams): Params {
+    console.log("XXX: getParams", { p });
+
     const to = p.get("to") || "";
     const calldata = p.get("data") || "";
     const args = {
@@ -28,14 +45,28 @@
     };
     const value = p.get("value") || "";
     const hint = p.get("hint") || "";
-    editing = (to === "");
     return {
       to, calldata, args, value, hint
     }
   }
 
-  $: params = getParams($page.url.searchParams);
+  let transactionBuilder : TransactionBuilder;
+
+  // $: params = getParams($page.url.searchParams);
+  page.subscribe(({ url }) => {
+    const p = getParams(url.searchParams);
+    if (JSON.stringify(p) === JSON.stringify(params)) return;
+    params = p;
+    transactionBuilder?.load(params);
+  });
+
+  onMount(() => {
+    transactionBuilder?.load(params);
+  });
 </script>
 
-<TransactionBuilder config={ wcConfig } editing={editing} to={ params.to } calldata={ params.calldata } args={ params.args } value={ params.value } hint={ params.hint }/>
-
+<TransactionBuilder
+  config={wcConfig}
+  bind:this={transactionBuilder}
+  args={params.args}
+/>

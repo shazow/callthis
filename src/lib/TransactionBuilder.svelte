@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { pushState } from '$app/navigation';
   import { ethers } from "ethers";
   import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
@@ -18,22 +18,46 @@
   }
 
   export let config : Config;
-  export let calldata : string;
   export let args : Record<string, string[]>;
-  export let value : string;
-  export let to : string;
-  export let editing : boolean = (to === "");
-  export let hint : string;
+  let calldata : string = "";
+  let value : string = "";
+  let to : string = "";
+  let editing : boolean = (to === "");
+  let hint : string = "";
+
+  let resetKey = {};
+
+  export async function load(params: {calldata: string, value: string, to: string, hint: string}) {
+    calldata = params.calldata;
+    value = params.value;
+    to = params.to;
+    hint = params.hint;
+    editing = (to === "");
+    loading = {};
+
+    if (calldata.length >= 10 && hint) {
+      await loadHint(hint);
+    }
+    if (calldata.length <= 2) { // 0x
+      selectedFunction = "";
+      selectedFragment = undefined;
+      functionArgs = [];
+      functions = [];
+      preparedTx = null;
+    }
+    if (!to) {
+      toResolved = "";
+      resetKey = {}; // Nuke Address element and reinit
+      result = null;
+    }
+  }
 
   let from : string;
   let toResolved : string;
-  let toMethods : {
-    resolve(target:any): Promise<string>,
-  };
-  let connectMethods : {
-    connect(): Promise<void>;
-    disconnect: null|(() => void),
-  };
+
+  let toAddressComponent : Address;
+  let connectWalletComponent : ConnectWallet;
+
   const defaultProvider = ethers.getDefaultProvider("homestead");
   let provider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
@@ -61,23 +85,20 @@
     }),
   ]);
 
-  onMount(async () => {
-    // Load hint?
-    if (calldata.length >= 10 && hint) {
-      const maybeABI = ethers.Interface.from(["function " + hint]);
-      const fn = maybeABI.getFunction(calldata.slice(0, 10));
-      if (!fn) return;
+  async function loadHint(hint: string) {
+    const maybeABI = ethers.Interface.from(["function " + hint]);
+    const fn = maybeABI.getFunction(calldata.slice(0, 10));
+    if (!fn) return;
 
-      selectedFunction = fn.selector;
-      abi = maybeABI;
-      functions = [fn];
-      updateFunction();
-      log.info('Loaded partial ABI from hint');
-    }
+    selectedFunction = fn.selector;
+    abi = maybeABI;
+    functions = [fn];
+    updateFunction();
+    log.info('Loaded partial ABI from hint');
 
-    if (provider) await toMethods.resolve("mount");
+    if (provider) await toAddressComponent.resolve("mount");
     else if (to) await loadAddress();
-  });
+  }
 
   const log = {
     error(err: Error|string) {
@@ -102,6 +123,18 @@
     return Promise.resolve(r);
   };
 
+  function prepareTransaction(from: string, to: string, calldata: string, value: string): PreparedTransaction {
+    const tx : PreparedTransaction = {
+      from: from,
+      to: to,
+      data: null,
+      value: null,
+    };
+    if (calldata) tx.data = calldata;
+    if (value && value !== "0") tx.value = ethers.parseEther(value);
+    return tx;
+  }
+
   async function handleSubmit() {
     if (loading.submit) {
       log.info("Already submitting, ignored new submit");
@@ -117,40 +150,40 @@
 
     if (!toResolved) {
       log.info("Transaction 'to' field is not resolved");
-      await toMethods.resolve("submit");
+      await toAddressComponent.resolve("submit");
     }
 
-    const tx : PreparedTransaction = {
-      from: from,
-      to: toResolved,
-      data: null,
-      value: null,
-    };
-    if (calldata) tx.data = calldata;
-    if (value && value !== "0") tx.value = ethers.parseEther(value);
-
+    const tx = prepareTransaction(from, toResolved || to, calldata, value);
     if (!tx.to) {
       // TODO: We can remove this check once ethers.js v6 bug is fixed?
       return log.error("Failed resolving 'to' address");
     }
 
     loading.submit = true;
+    let stale = false;
     try {
-      let r = await provider.call(tx);
+      const r = await provider.call(tx);
+      result = {
+        status: "ok",
+      };
       if (selectedFragment && selectedFragment.outputs?.length > 0) {
         // TODO: Use this function once its implemented: abi.parseCallResult(r)
         const res = abi.decodeFunctionResult(selectedFragment, r);
-        r = res.toString();
-      }
-      result = {
-        status: "ok",
-        value: r,
+        result.value = res.toString();
       }
       log.info("Loaded result", result);
+
+      const currentTx = prepareTransaction(from, toResolved || to, calldata, value);
+      stale = tx.to !== currentTx.to && tx.data !== currentTx.data && tx.value !== currentTx.value;
+      if (stale) {
+        log.info("Removed stale result:", result);
+        result = null;
+      }
     } catch(err) {
       return log.error(err as Error);
     } finally {
       loading.submit = false;
+      if (stale) return;
       const mutability = selectedFragment?.stateMutability;
       if (mutability !== "view" && mutability != "pure") {
         preparedTx = tx;
@@ -236,7 +269,7 @@
     from = wallet.accounts[0];
     network = await provider.getNetwork();
     log.info(`Connected wallet: ${from}`);
-    if (to) toMethods.resolve("connect");
+    if (to) toAddressComponent.resolve("connect");
   }
 
   async function disconnect() {
@@ -271,7 +304,7 @@
     }
 
     // TODO: Subscribe to history changes
-    window.history.pushState({}, "link", $page.url);
+    pushState($page.url, state);
     editing = false;
   }
 
@@ -317,13 +350,15 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
+    <ConnectWallet bind:this={connectWalletComponent} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
       <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
 
   <section>
-    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+    {#key resetKey}
+    <Address required disabled={ !editing } bind:this={ toAddressComponent } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+    {/key}
   </section>
 
   {#if loading.to}
@@ -417,7 +452,7 @@
   <section>
     <h2>Execute On-chain</h2>
     {#if !signer}
-    <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
+    <button class="icon-connect" on:click|preventDefault={ _ => connectWalletComponent.methods.connect("any") } >Connect Wallet</button>
     {/if}
     <button on:click|preventDefault={ submitTransaction } disabled={ !signer || loading.submit }>🚀 Submit Transaction</button>
     {#if signer}
