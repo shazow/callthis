@@ -162,15 +162,14 @@
     loading.submit = true;
     let stale = false;
     try {
-      let r = await provider.call(tx);
+      const r = await provider.call(tx);
+      result = {
+        status: "ok",
+      };
       if (selectedFragment && selectedFragment.outputs?.length > 0) {
         // TODO: Use this function once its implemented: abi.parseCallResult(r)
         const res = abi.decodeFunctionResult(selectedFragment, r);
-        r = res.toString();
-      }
-      result = {
-        status: "ok",
-        value: r,
+        result.value = res.toString();
       }
       log.info("Loaded result", result);
 
