@@ -14,30 +14,27 @@
   export let resolved = "";
   export let value = resolved;
 
-  export const methods = {
-    async resolve(target: any): Promise<string> {
-    console.log("XXX", "Address", "resolving", value);
-      error = "";
-      if (!value) {
-        resolved = "";
-        return "";
-      }
-      try {
-        loading = true;
-        resolved = await resolver(value);
-      } catch (err) {
-        error = "Failed to resolve";
-        throw err;
-      } finally {
-        loading = false;
-      }
-      error = "";
-      if (was === resolved) return resolved;
-      was = resolved;
-      dispatch("change", { target, value, resolved });
-      return resolved;
-    },
-  };
+  export async function resolve(target: any): Promise<string> {
+    error = "";
+    if (!value) {
+      resolved = "";
+      return "";
+    }
+    try {
+      loading = true;
+      resolved = await resolver(value);
+    } catch (err) {
+      error = "Failed to resolve";
+      throw err;
+    } finally {
+      loading = false;
+    }
+    error = "";
+    if (was === resolved) return resolved;
+    was = resolved;
+    dispatch("change", { target, value, resolved });
+    return resolved;
+  }
 
   let el: HTMLInputElement;
   let was = "";
@@ -48,7 +45,7 @@
     resolved = "";
     const target = event.target as HTMLInputElement;
     if (!target.validity.valid) return;
-    return methods.resolve(target);
+    return resolve(target);
   }
 </script>
 
@@ -78,7 +75,7 @@
     {#if el.validity.patternMismatch}
       <div class="invalid">Must be a valid ENS or hex address</div>
     {:else if el.validity.valueMissing}
-
+      <!-- Value missing -->
     {:else}
       <div class="invalid">{el.validationMessage}</div>
     {/if}

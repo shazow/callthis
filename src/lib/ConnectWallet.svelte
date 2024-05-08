@@ -65,7 +65,7 @@
   }
 
   // FIXME: The call flow to here is janky, need to refactor
-  export async function connect(force: "walletconnect"|"injected"|"safe"|"any", provider?: any, account?: string) {
+  export async function connect(force?: "walletconnect"|"injected"|"safe"|"any", provider?: any, account?: string) {
     if (force === "safe") {
       accounts = account ? [account] : [];
       dispatch("connect", { provider: provider, accounts });

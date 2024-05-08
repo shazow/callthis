@@ -43,6 +43,7 @@
       selectedFragment = undefined;
       functionArgs = [];
       functions = [];
+      preparedTx = null;
     }
     if (!to) {
       toResolved = "";
@@ -54,14 +55,9 @@
   let from : string;
   let toResolved : string;
 
-  // TODO: Refactor to use bind:this in the component
-  let toMethods : {
-    resolve(target:any): Promise<string>,
-  };
-  let connectMethods : {
-    connect(): Promise<void>;
-    disconnect: null|(() => void),
-  };
+  let toAddressComponent : Address;
+  let connectWalletComponent : ConnectWallet;
+
   const defaultProvider = ethers.getDefaultProvider("homestead");
   let provider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
@@ -100,7 +96,7 @@
     updateFunction();
     log.info('Loaded partial ABI from hint');
 
-    if (provider) await toMethods.resolve("mount");
+    if (provider) await toAddressComponent.resolve("mount");
     else if (to) await loadAddress();
   }
 
@@ -127,6 +123,18 @@
     return Promise.resolve(r);
   };
 
+  function prepareTransaction(from: string, to: string, calldata: string, value: string): PreparedTransaction {
+    const tx : PreparedTransaction = {
+      from: from,
+      to: to,
+      data: null,
+      value: null,
+    };
+    if (calldata) tx.data = calldata;
+    if (value && value !== "0") tx.value = ethers.parseEther(value);
+    return tx;
+  }
+
   async function handleSubmit() {
     if (loading.submit) {
       log.info("Already submitting, ignored new submit");
@@ -142,18 +150,10 @@
 
     if (!toResolved) {
       log.info("Transaction 'to' field is not resolved");
-      await toMethods.resolve("submit");
+      await toAddressComponent.resolve("submit");
     }
 
-    const tx : PreparedTransaction = {
-      from: from,
-      to: toResolved,
-      data: null,
-      value: null,
-    };
-    if (calldata) tx.data = calldata;
-    if (value && value !== "0") tx.value = ethers.parseEther(value);
-
+    const tx = prepareTransaction(from, toResolved || to, calldata, value);
     if (!tx.to) {
       // TODO: We can remove this check once ethers.js v6 bug is fixed?
       return log.error("Failed resolving 'to' address");
@@ -174,7 +174,8 @@
       }
       log.info("Loaded result", result);
 
-      stale = tx.to !== toResolved || tx.data !== calldata || tx.value !== ethers.parseEther(value);
+      const currentTx = prepareTransaction(from, toResolved || to, calldata, value);
+      stale = tx.to !== currentTx.to && tx.data !== currentTx.data && tx.value !== currentTx.value;
       if (stale) {
         log.info("Removed stale result:", result);
         result = null;
@@ -269,7 +270,7 @@
     from = wallet.accounts[0];
     network = await provider.getNetwork();
     log.info(`Connected wallet: ${from}`);
-    if (to) toMethods.resolve("connect");
+    if (to) toAddressComponent.resolve("connect");
   }
 
   async function disconnect() {
@@ -350,14 +351,14 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:methods={connectMethods} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
+    <ConnectWallet bind:this={connectWalletComponent} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
       <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
 
   <section>
     {#key resetKey}
-    <Address required disabled={ !editing } bind:methods={ toMethods } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
+    <Address required disabled={ !editing } bind:this={ toAddressComponent } resolver={ resolver } bind:value={ to } on:change={ loadAddress }><h2>To</h2></Address>
     {/key}
   </section>
 
@@ -452,7 +453,7 @@
   <section>
     <h2>Execute On-chain</h2>
     {#if !signer}
-    <button class="icon-connect" on:click|preventDefault={ connectMethods.connect } >Connect Wallet</button>
+    <button class="icon-connect" on:click|preventDefault={ _ => connectWalletComponent.methods.connect("any") } >Connect Wallet</button>
     {/if}
     <button on:click|preventDefault={ submitTransaction } disabled={ !signer || loading.submit }>🚀 Submit Transaction</button>
     {#if signer}
