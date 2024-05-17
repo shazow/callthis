@@ -26,6 +26,7 @@
     args: Record<string, string[]>,
     value: string,
     hint: string,
+    chainid: number,
   };
   let params : Params = {
     to: "",
@@ -33,6 +34,7 @@
     args: {},
     value: "",
     hint: "",
+    chainid: 1,
   };
 
   function getParams(p : URLSearchParams): Params {
@@ -43,8 +45,9 @@
     };
     const value = p.get("value") || "";
     const hint = p.get("hint") || "";
+    const chainid = Number(p.get("chainid") || 1);
     return {
-      to, calldata, args, value, hint
+      to, calldata, args, value, hint, chainid
     }
   }
 

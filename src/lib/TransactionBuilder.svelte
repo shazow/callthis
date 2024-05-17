@@ -24,14 +24,16 @@
   let to : string = "";
   let editing : boolean = (to === "");
   let hint : string = "";
+  let chainid : number = 1;
 
   let resetKey = {};
 
-  export async function load(params: {calldata: string, value: string, to: string, hint: string}) {
+  export async function load(params: {calldata: string, value: string, to: string, hint: string, chainid: number}) {
     calldata = params.calldata;
     value = params.value;
     to = params.to;
     hint = params.hint;
+    chainid = params.chainid;
     editing = (to === "");
     loading = {};
 
@@ -74,7 +76,7 @@
   let network : {
     chainId: bigint,
     name: string,
-  };
+  } | null = null;
   let loading : Record<string, boolean> = {};
 
   const abiLoader = new loaders.MultiABILoader([
@@ -264,10 +266,25 @@
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
+    network = await browserProvider.getNetwork();
+
+    if (chainid !== Number(network.chainId)) {
+      const params = [{ "chainId": "0x" + chainid.toString(16) }];
+      try {
+        await browserProvider.send("wallet_switchEthereumChain", params);
+      } catch (error) {
+        if ((error as Error).message.includes("Unrecognized chain ID")) {
+          log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
+        }
+        return
+      }
+      return connect(wallet);
+    }
+
     provider = browserProvider;
     signer = await browserProvider.getSigner();
     from = wallet.accounts[0];
-    network = await provider.getNetwork();
+
     log.info(`Connected wallet: ${from}`);
     if (to) toAddressComponent.resolve("connect");
   }
@@ -276,6 +293,7 @@
     log.info("Wallet disconnected");
     provider = defaultProvider;
     signer = undefined;
+    network = null;
   }
 
   function updateLink() {
@@ -290,6 +308,7 @@
       value: value,
       hint: selectedFragment?.format("sighash"),
     }
+    if (chainid > 1) state.chainid = chainid.toString();
 
     // Clear unset keys
     for (const key of $page.url.searchParams.keys()) {
@@ -303,7 +322,6 @@
       $page.url.searchParams.set(k, v);
     }
 
-    // TODO: Subscribe to history changes
     pushState($page.url, state);
     editing = false;
   }
@@ -350,7 +368,7 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:this={connectWalletComponent} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
+    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
       <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>

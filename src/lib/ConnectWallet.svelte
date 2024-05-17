@@ -28,11 +28,13 @@
 
   export let accounts: Array<string> = [];
 
+  export let chainid: number = 1;
+
   export let config: Config = {
     // Required fields
     projectId: "",
     showQrModal: true,
-    chains: [1],
+    chains: [chainid],
   };
 
   let loading = false;
