@@ -4,6 +4,7 @@
   import { ethers } from "ethers";
   import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
+  import NetworkSelector from '$lib/NetworkSelector.svelte';
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
   import Value from '$lib/contract/Value.svelte';
@@ -59,6 +60,7 @@
 
   let toAddressComponent : Address;
   let connectWalletComponent : ConnectWallet;
+  let networkSelectorComponent : NetworkSelector;
 
   const defaultProvider = ethers.getDefaultProvider("homestead");
   let provider : ethers.Provider = defaultProvider;
@@ -233,6 +235,7 @@
         abiLoader,
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
+        addressResolver: resolver,
       });
     } finally {
       loading.to = false;
@@ -264,20 +267,30 @@
     }
   }
 
+  async function switchNetwork(chainid: number) {
+    if (!signer) {
+      return networkSelectorComponent.change(chainid);
+    }
+    const browserProvider = provider as ethers.BrowserProvider;
+    const params = [{ "chainId": "0x" + chainid.toString(16) }];
+    try {
+      await browserProvider.send("wallet_switchEthereumChain", params);
+    } catch (error) {
+      if ((error as Error).message.includes("Unrecognized chain ID")) {
+        log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
+      }
+      return
+    }
+
+    connect({ provider: browserProvider, accounts: [from] });
+  }
+
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
     network = await browserProvider.getNetwork();
 
     if (chainid !== Number(network.chainId)) {
-      const params = [{ "chainId": "0x" + chainid.toString(16) }];
-      try {
-        await browserProvider.send("wallet_switchEthereumChain", params);
-      } catch (error) {
-        if ((error as Error).message.includes("Unrecognized chain ID")) {
-          log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
-        }
-        return
-      }
+      await switchNetwork(chainid);
       return connect(wallet);
     }
 
@@ -326,6 +339,29 @@
     editing = false;
   }
 
+  function onNetworkChanged(event: CustomEvent) {
+    const n = event.detail.network;
+    if (n === undefined) {
+      return connectWalletComponent.methods.connect("any");
+    }
+    if (signer) {
+      return switchNetwork(n.chainid);
+    }
+
+    // Fallback provider composed of all the network.rpc[] endpoints
+    provider = new ethers.FallbackProvider(
+      n.rpc.map((url: string) => {
+        return new ethers.JsonRpcProvider(url)
+      })
+    );
+    chainid = n.chainid;
+    provider.getNetwork().then(n => {
+      network = n;
+    })
+
+    log.info(`Network changed to ${n.name}`, n, provider);
+  }
+
   function onInputsChanged(event: CustomEvent) {
     if (!form.checkValidity()) {
       calldata = "";
@@ -366,6 +402,11 @@
 </script>
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
+  <section>
+    <h2>Network</h2>
+    <NetworkSelector bind:this={networkSelectorComponent} selected={chainid} on:change={ onNetworkChanged } />
+  </section>
+
   <section>
     <h2>From</h2>
     <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
