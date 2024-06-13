@@ -34,9 +34,13 @@
     value = params.value;
     to = params.to;
     hint = params.hint;
-    chainid = params.chainid;
     editing = (to === "");
     loading = {};
+
+    if (chainid !== params.chainid) {
+      await switchNetwork(params.chainid);
+      chainid = params.chainid;
+    }
 
     if (calldata.length >= 10 && hint) {
       await loadHint(hint);
@@ -146,7 +150,7 @@
     }
     result = null;
     preparedTx = null;
-    log.info("Submitting preview transaction", { from, toResolved, calldata, value });
+    log.info("Submitting preview transaction", { from, toResolved, calldata, value, provider });
 
     if (!provider) {
       return log.error("Ethereum provider not available");
@@ -154,7 +158,7 @@
 
     if (!toResolved) {
       log.info("Transaction 'to' field is not resolved");
-      await toAddressComponent.resolve("submit");
+      toResolved = await toAddressComponent.resolve("submit");
     }
 
     const tx = prepareTransaction(from, toResolved || to, calldata, value);
@@ -221,6 +225,8 @@
   }
 
   async function loadAddress(event?: CustomEvent) {
+    result = null;
+
     if (!provider) {
       return;
     }
@@ -360,6 +366,8 @@
     })
 
     log.info(`Network changed to ${n.name}`, n, provider);
+
+    loadAddress();
   }
 
   function onInputsChanged(event: CustomEvent) {
@@ -508,6 +516,8 @@
   {/if}
 
   {#if preparedTx}
+  <hr />
+
   <section>
     <h2>Execute On-chain</h2>
     {#if !signer}
@@ -574,5 +584,10 @@
     color: rgb(200, 150, 50);
     text-align: center;
     width: 100%;
+  }
+
+  hr {
+    margin: 2.5em auto;
+    width: 20%;
   }
 </style>
