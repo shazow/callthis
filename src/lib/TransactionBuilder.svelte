@@ -242,6 +242,9 @@
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
         addressResolver: resolver,
+        ... whatsabi.loaders.defaultsWithEnv({
+          SOURCIFY_CHAIN_ID: chainid,
+        }),
       });
     } finally {
       loading.to = false;
