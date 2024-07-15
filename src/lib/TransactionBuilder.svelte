@@ -257,7 +257,11 @@
       abi = ethers.Interface.from(r.abi);
       functions = [];
       abi.forEachFunction(f => functions.push(f));
+    } else if (r.abi.length === 0) {
+      functions = [];
+      abi = ethers.Interface.from([]);
     }
+
     updateFunction();
   }
 

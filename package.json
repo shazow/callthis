@@ -25,7 +25,7 @@
 	"dependencies": {
 		"@safe-global/safe-apps-provider": "^0.18.3",
 		"@safe-global/safe-apps-sdk": "^9.1.0",
-		"@shazow/whatsabi": "^0.13.1",
+		"@shazow/whatsabi": "^0.13.2",
 		"@sveltejs/vite-plugin-svelte": "^3.1.1",
 		"@walletconnect/ethereum-provider": "^2.13.3",
 		"@walletconnect/modal": "^2.6.2",

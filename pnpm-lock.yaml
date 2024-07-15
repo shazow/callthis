@@ -12,8 +12,8 @@ dependencies:
     specifier: ^9.1.0
     version: 9.1.0(typescript@5.5.3)
   '@shazow/whatsabi':
-    specifier: ^0.13.1
-    version: 0.13.1(@noble/hashes@1.4.0)
+    specifier: ^0.13.2
+    version: 0.13.2(@noble/hashes@1.4.0)
   '@sveltejs/vite-plugin-svelte':
     specifier: ^3.1.1
     version: 3.1.1(svelte@4.2.18)(vite@5.3.3)
@@ -724,8 +724,8 @@ packages:
       '@scure/base': 1.1.7
     dev: false
 
-  /@shazow/whatsabi@0.13.1(@noble/hashes@1.4.0):
-    resolution: {integrity: sha512-nS1EldZ26dGOIfj+oB+j5mG50suRYonWmkHxvHo8gbhg1G0hbUZhjiWxHy2u6IkjK9SFXBTbzIFgMKCp8dCZnQ==}
+  /@shazow/whatsabi@0.13.2(@noble/hashes@1.4.0):
+    resolution: {integrity: sha512-omF4QMrGeXY1fW9EgkvtyHW9qEVF9jIE8tRlpbs+PcK4fzowOTEN0BowLX+rdylucnZ8fuWnuva0upU9dqDYCg==}
     peerDependencies:
       '@noble/hashes': ^1
     dependencies:
