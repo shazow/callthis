@@ -208,10 +208,9 @@ form {
 .example {
   border-radius: 1.5em;
   display: block;
-  width: 24rem;
   background: var(--header-bg-color);
   padding: 0.5em;
-  margin: 0 auto;
+  line-height: 1.2em;
 
   h3 {
     color: var(--header-text-color);
@@ -220,13 +219,15 @@ form {
   }
 
   ul {
-    font-weight: bold;
     padding: 0;
   }
 
   li {
-    list-style: none;
-    margin: 0 1em 0.8em 1em;
+    margin: 0 2em 0.5em 2em;
+  }
+
+  strong {
+    background: rgba(255,255,255,0.3);
   }
 }
 

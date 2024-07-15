@@ -541,10 +541,15 @@
 
 {#if !to}
 <section class="example">
-  <h3>Build a transaction, get a link:</h3>
+  <h3>Callthis is a transaction builder...</h3>
   <ul>
-    <li>🥹 Example: <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to <code>callthis.eth</code></a></li>
-    <li>💰 Example: <a href="/?data=0x70a08231000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045&to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&hint=balanceOf(address)%20returns%20(uint256)">Call <code>USDC.balanceOf(vitalik.eth)</code></a></li>
+    <li><strong>Generate an interface for any contract</strong>, even if it's unverified. (Powered by <a target="_blank" href="https://github.com/shazow/whatsabi">WhatsABI</a>)</li>
+    <li>Build a transaction and save it as a link that can be shared and executed later. (Example: <a href="/?to=callthis.eth&value=0.1">Send 0.1 ETH to <code>callthis.eth</code></a>)</li>
+    <li><strong>Works with any EVM chain</strong>, with WalletConnect or Safe Wallets or browser-injected providers.</li>
+    <li>Address fields automatically resolved with ENS.</li>
+    <li>Supports complex contract inputs with tuples, arrays, etc.</li>
+    <li>No backend services required, <a href="https://github.com/shazow/callthis">grab the source</a> and <strong>run it locally for privacy and censorship-resistance</strong>!</li>
+    <li>Permissively licensed under MIT, use it in your products.</li>
   </ul>
 </section>
 {/if}
