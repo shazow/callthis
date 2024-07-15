@@ -4,6 +4,7 @@
   import { ethers } from "ethers";
   import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
+  import NetworkSelector from '$lib/NetworkSelector.svelte';
   import Address from '$lib/contract/Address.svelte';
   import Summary from '$lib/contract/Summary.svelte';
   import Value from '$lib/contract/Value.svelte';
@@ -24,16 +25,22 @@
   let to : string = "";
   let editing : boolean = (to === "");
   let hint : string = "";
+  let chainid : number = 1;
 
   let resetKey = {};
 
-  export async function load(params: {calldata: string, value: string, to: string, hint: string}) {
+  export async function load(params: {calldata: string, value: string, to: string, hint: string, chainid: number}) {
     calldata = params.calldata;
     value = params.value;
     to = params.to;
     hint = params.hint;
     editing = (to === "");
     loading = {};
+
+    if (chainid !== params.chainid) {
+      await switchNetwork(params.chainid);
+      chainid = params.chainid;
+    }
 
     if (calldata.length >= 10 && hint) {
       await loadHint(hint);
@@ -57,6 +64,7 @@
 
   let toAddressComponent : Address;
   let connectWalletComponent : ConnectWallet;
+  let networkSelectorComponent : NetworkSelector;
 
   const defaultProvider = ethers.getDefaultProvider("homestead");
   let provider : ethers.Provider = defaultProvider;
@@ -74,7 +82,7 @@
   let network : {
     chainId: bigint,
     name: string,
-  };
+  } | null = null;
   let loading : Record<string, boolean> = {};
 
   const abiLoader = new loaders.MultiABILoader([
@@ -142,7 +150,7 @@
     }
     result = null;
     preparedTx = null;
-    log.info("Submitting preview transaction", { from, toResolved, calldata, value });
+    log.info("Submitting preview transaction", { from, toResolved, calldata, value, provider });
 
     if (!provider) {
       return log.error("Ethereum provider not available");
@@ -150,7 +158,7 @@
 
     if (!toResolved) {
       log.info("Transaction 'to' field is not resolved");
-      await toAddressComponent.resolve("submit");
+      toResolved = await toAddressComponent.resolve("submit");
     }
 
     const tx = prepareTransaction(from, toResolved || to, calldata, value);
@@ -217,6 +225,8 @@
   }
 
   async function loadAddress(event?: CustomEvent) {
+    result = null;
+
     if (!provider) {
       return;
     }
@@ -231,6 +241,10 @@
         abiLoader,
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
+        addressResolver: resolver,
+        ... whatsabi.loaders.defaultsWithEnv({
+          SOURCIFY_CHAIN_ID: chainid,
+        }),
       });
     } finally {
       loading.to = false;
@@ -243,7 +257,11 @@
       abi = ethers.Interface.from(r.abi);
       functions = [];
       abi.forEachFunction(f => functions.push(f));
+    } else if (r.abi.length === 0) {
+      functions = [];
+      abi = ethers.Interface.from([]);
     }
+
     updateFunction();
   }
 
@@ -262,12 +280,37 @@
     }
   }
 
+  async function switchNetwork(chainid: number) {
+    if (!signer) {
+      return networkSelectorComponent.change(chainid);
+    }
+    const browserProvider = provider as ethers.BrowserProvider;
+    const params = [{ "chainId": "0x" + chainid.toString(16) }];
+    try {
+      await browserProvider.send("wallet_switchEthereumChain", params);
+    } catch (error) {
+      if ((error as Error).message.includes("Unrecognized chain ID")) {
+        log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
+      }
+      return
+    }
+
+    connect({ provider: browserProvider, accounts: [from] });
+  }
+
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
+    network = await browserProvider.getNetwork();
+
+    if (chainid !== Number(network.chainId)) {
+      await switchNetwork(chainid);
+      return connect(wallet);
+    }
+
     provider = browserProvider;
     signer = await browserProvider.getSigner();
     from = wallet.accounts[0];
-    network = await provider.getNetwork();
+
     log.info(`Connected wallet: ${from}`);
     if (to) toAddressComponent.resolve("connect");
   }
@@ -276,6 +319,7 @@
     log.info("Wallet disconnected");
     provider = defaultProvider;
     signer = undefined;
+    network = null;
   }
 
   function updateLink() {
@@ -290,6 +334,7 @@
       value: value,
       hint: selectedFragment?.format("sighash"),
     }
+    if (chainid > 1) state.chainid = chainid.toString();
 
     // Clear unset keys
     for (const key of $page.url.searchParams.keys()) {
@@ -303,9 +348,33 @@
       $page.url.searchParams.set(k, v);
     }
 
-    // TODO: Subscribe to history changes
     pushState($page.url, state);
     editing = false;
+  }
+
+  function onNetworkChanged(event: CustomEvent) {
+    const n = event.detail.network;
+    if (n === undefined) {
+      return connectWalletComponent.methods.connect("any");
+    }
+    if (signer) {
+      return switchNetwork(n.chainid);
+    }
+
+    // Fallback provider composed of all the network.rpc[] endpoints
+    provider = new ethers.FallbackProvider(
+      n.rpc.map((url: string) => {
+        return new ethers.JsonRpcProvider(url)
+      })
+    );
+    chainid = n.chainid;
+    provider.getNetwork().then(n => {
+      network = n;
+    })
+
+    log.info(`Network changed to ${n.name}`, n, provider);
+
+    loadAddress();
   }
 
   function onInputsChanged(event: CustomEvent) {
@@ -349,8 +418,13 @@
 
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
+    <h2>Network</h2>
+    <NetworkSelector bind:this={networkSelectorComponent} selected={chainid} on:change={ onNetworkChanged } />
+  </section>
+
+  <section>
     <h2>From</h2>
-    <ConnectWallet bind:this={connectWalletComponent} config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
+    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
       <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
@@ -449,6 +523,8 @@
   {/if}
 
   {#if preparedTx}
+  <hr />
+
   <section>
     <h2>Execute On-chain</h2>
     {#if !signer}
@@ -515,5 +591,10 @@
     color: rgb(200, 150, 50);
     text-align: center;
     width: 100%;
+  }
+
+  hr {
+    margin: 2.5em auto;
+    width: 20%;
   }
 </style>
