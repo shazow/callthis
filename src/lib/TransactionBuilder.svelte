@@ -227,7 +227,7 @@
   async function loadAddress(event?: CustomEvent) {
     result = null;
 
-    if (!provider) {
+    if (!provider || !to) {
       return;
     }
     if (event) toResolved = event.detail.resolved;
