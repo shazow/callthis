@@ -2,6 +2,7 @@
   --bg-color: rgb(255,255,255);
   --text-color: rgba(42,42,42);
   --label-color: rgba(0, 0, 0, 0.5);
+  --aside-color: rgba(200, 135, 75, 0.8);
 
   --header-bg-color: rgb(255, 200, 80);
   --header-text-color: rgba(200,130,0,0.8);
@@ -14,11 +15,12 @@
 }
 
 [data-theme = "dark"] {
-  --bg-color: rgb(0, 0, 0); // Black to be OLED friendly
-  --text-color: rgba(255, 255, 255, 0.7);
+  --bg-color: rgb(0, 0, 0);
+  --text-color: rgba(235, 255, 255, 0.7);
   --label-color: rgba(255, 255, 255, 0.5);
+  --aside-color: rgba(200, 135, 75, 0.5);
 
-  --header-bg-color: rgb(25, 25, 112);
+  --header-bg-color: rgb(35, 50, 80);
   --header-text-color: rgba(255, 200, 80, 0.9);
   --header-border-bottom: 3px solid rgba(255, 255, 255, 0.1);
 
@@ -27,9 +29,29 @@
   --link-color: rgb(140, 180, 255);
   --link-color-hover: rgba(140, 180, 255, 0.6);
 
-  input,textarea {
+  input,textarea,select,button {
+    background: inherit;
+    color: rgb(255,255,255);
+    border-color: var(--header-bg-color);
+
+    &[type="text"] {
+      font-weight: bold;
+    }
+
+    &::placeholder {
+      color: rgba(255,255,255,0.5);
+      font-weight: initial;
+    }
+
     &:disabled {
       color: rgb(155, 153, 153);
+      border-color: rgba(200, 200, 200, 0.2);
+      background: rgba(50, 50, 50, 0.2);
+      font-weight: initial;
     }
+  }
+
+  option, optgroup {
+    color: black;
   }
 }
