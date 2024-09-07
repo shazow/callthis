@@ -9,26 +9,26 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.2.2",
-		"@sveltejs/adapter-static": "^3.0.2",
-		"@sveltejs/kit": "^2.5.18",
-		"abitype": "^1.0.5",
-		"sass": "^1.77.8",
-		"svelte": "^4.2.18",
-		"svelte-check": "^3.8.4",
-		"svelte-language-server": "^0.16.13",
-		"tslib": "^2.6.3",
-		"typescript": "^5.5.3",
-		"vite": "^5.3.3"
+		"@sveltejs/adapter-auto": "^3.2.4",
+		"@sveltejs/adapter-static": "^3.0.4",
+		"@sveltejs/kit": "^2.5.26",
+		"abitype": "^1.0.6",
+		"sass": "^1.78.0",
+		"svelte": "^4.2.19",
+		"svelte-check": "^3.8.6",
+		"svelte-language-server": "^0.16.14",
+		"tslib": "^2.7.0",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.3"
 	},
 	"type": "module",
 	"dependencies": {
 		"@safe-global/safe-apps-provider": "^0.18.3",
 		"@safe-global/safe-apps-sdk": "^9.1.0",
 		"@shazow/whatsabi": "^0.13.2",
-		"@sveltejs/vite-plugin-svelte": "^3.1.1",
-		"@walletconnect/ethereum-provider": "^2.13.3",
+		"@sveltejs/vite-plugin-svelte": "^3.1.2",
+		"@walletconnect/ethereum-provider": "^2.16.0",
 		"@walletconnect/modal": "^2.6.2",
-		"ethers": "^6.13.1"
+		"ethers": "^6.13.2"
 	}
 }
