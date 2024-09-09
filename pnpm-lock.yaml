@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@safe-global/safe-apps-provider':
         specifier: ^0.18.3
-        version: 0.18.3(typescript@5.5.4)
+        version: 0.18.3(typescript@5.6.2)
       '@safe-global/safe-apps-sdk':
         specifier: ^9.1.0
-        version: 9.1.0(typescript@5.5.4)
+        version: 9.1.0(typescript@5.6.2)
       '@shazow/whatsabi':
         specifier: ^0.13.2
         version: 0.13.2(@noble/hashes@1.5.0)
@@ -21,8 +21,8 @@ importers:
         specifier: ^3.1.2
         version: 3.1.2(svelte@4.2.19)(vite@5.4.3(@types/node@18.15.13)(sass@1.78.0))
       '@walletconnect/ethereum-provider':
-        specifier: ^2.16.0
-        version: 2.16.0(react@18.3.1)
+        specifier: ^2.16.1
+        version: 2.16.1(react@18.3.1)
       '@walletconnect/modal':
         specifier: ^2.6.2
         version: 2.6.2(react@18.3.1)
@@ -41,7 +41,7 @@ importers:
         version: 2.5.26(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.3(@types/node@18.15.13)(sass@1.78.0)))(svelte@4.2.19)(vite@5.4.3(@types/node@18.15.13)(sass@1.78.0))
       abitype:
         specifier: ^1.0.6
-        version: 1.0.6(typescript@5.5.4)
+        version: 1.0.6(typescript@5.6.2)
       sass:
         specifier: ^1.78.0
         version: 1.78.0
@@ -58,8 +58,8 @@ importers:
         specifier: ^2.7.0
         version: 2.7.0
       typescript:
-        specifier: ^5.5.4
-        version: 5.5.4
+        specifier: ^5.6.2
+        version: 5.6.2
       vite:
         specifier: ^5.4.3
         version: 5.4.3(@types/node@18.15.13)(sass@1.78.0)
@@ -600,15 +600,15 @@ packages:
   '@vscode/l10n@0.0.18':
     resolution: {integrity: sha512-KYSIHVmslkaCDyw013pphY+d7x1qV8IZupYfeIfzNA+nsaWHbn5uPuQRvdRFsa9zFzGeudPuoGoZ1Op4jrJXIQ==}
 
-  '@walletconnect/core@2.16.0':
-    resolution: {integrity: sha512-B/PPcg0MRb9pqB6nupVqEFGI5cFK5HNXYoi+y6Qaq53JIjHa6KANskNkj567iegETaPUZIniHENry7M8mHN3Bw==}
+  '@walletconnect/core@2.16.1':
+    resolution: {integrity: sha512-UlsnEMT5wwFvmxEjX8s4oju7R3zadxNbZgsFeHEsjh7uknY2zgmUe1Lfc5XU6zyPb1Jx7Nqpdx1KN485ee8ogw==}
     engines: {node: '>=18'}
 
   '@walletconnect/environment@1.0.1':
     resolution: {integrity: sha512-T426LLZtHj8e8rYnKfzsw1aG6+M0BT1ZxayMdv/p8yM0MU+eJDISqNY3/bccxRr4LrF9csq02Rhqt08Ibl0VRg==}
 
-  '@walletconnect/ethereum-provider@2.16.0':
-    resolution: {integrity: sha512-T48+siYOXeVdLjqSJA+ZaiB7gRoDreHVgB3eUpC/6OqQRpigPRz7NF18JBsQlfEqdozNPLGk4yYpZp7f9BgCYw==}
+  '@walletconnect/ethereum-provider@2.16.1':
+    resolution: {integrity: sha512-oD7DNCssUX3plS5gGUZ9JQ63muQB/vxO68X6RzD2wd8gBsYtSPw4BqYFc7KTO6dUizD6gfPirw32yW2pTvy92w==}
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}
@@ -660,20 +660,20 @@ packages:
   '@walletconnect/safe-json@1.0.2':
     resolution: {integrity: sha512-Ogb7I27kZ3LPC3ibn8ldyUr5544t3/STow9+lzz7Sfo808YD7SBWk7SAsdBFlYgP2zDRy2hS3sKRcuSRM0OTmA==}
 
-  '@walletconnect/sign-client@2.16.0':
-    resolution: {integrity: sha512-R9C9D8jaARbosXvA9IGIAowashGqp9avmjx6gikH4lKq2qhDjD5CWZq+GrN6gcht6WQiQ1mNmrmhN1pBPvivwQ==}
+  '@walletconnect/sign-client@2.16.1':
+    resolution: {integrity: sha512-s2Tx2n2duxt+sHtuWXrN9yZVaHaYqcEcjwlTD+55/vs5NUPlISf+fFmZLwSeX1kUlrSBrAuxPUcqQuRTKcjLOA==}
 
   '@walletconnect/time@1.0.2':
     resolution: {integrity: sha512-uzdd9woDcJ1AaBZRhqy5rNC9laqWGErfc4dxA9a87mPdKOgWMD85mcFo9dIYIts/Jwocfwn07EC6EzclKubk/g==}
 
-  '@walletconnect/types@2.16.0':
-    resolution: {integrity: sha512-n+vpli0eonAzG9wtOgmjYbJEMGz2gvOttU2VnzNkeVmvDz7otVuPgtk+7BNyRofZ6rBW6rriW5cCKtmbzvUSzA==}
+  '@walletconnect/types@2.16.1':
+    resolution: {integrity: sha512-9P4RG4VoDEF+yBF/n2TF12gsvT/aTaeZTVDb/AOayafqiPnmrQZMKmNCJJjq1sfdsDcHXFcZWMGsuCeSJCmrXA==}
 
-  '@walletconnect/universal-provider@2.16.0':
-    resolution: {integrity: sha512-N36TXTsBwwzH6sI8jvNuiAnTRzzkmBUxSyTjzL7fpJURaBugoGkrtzKDZf+DLkR8VrFFqizOFgS/AOFek/pM5Q==}
+  '@walletconnect/universal-provider@2.16.1':
+    resolution: {integrity: sha512-q/tyWUVNenizuClEiaekx9FZj/STU1F3wpDK4PUIh3xh+OmUI5fw2dY3MaNDjyb5AyrS0M8BuQDeuoSuOR/Q7w==}
 
-  '@walletconnect/utils@2.16.0':
-    resolution: {integrity: sha512-ASh9yyqzP4GLIU400rKEvBefcM5GFJbi2Iw7p0SFDyFC5WZYYyllU3WopU+YV/7bbukCMkthEIdioWYlpmjERQ==}
+  '@walletconnect/utils@2.16.1':
+    resolution: {integrity: sha512-aoQirVoDoiiEtYeYDtNtQxFzwO/oCrz9zqeEEXYJaAwXlGVTS34KFe7W3/Rxd/pldTYKFOZsku2EzpISfH8Wsw==}
 
   '@walletconnect/window-getters@1.0.1':
     resolution: {integrity: sha512-vHp+HqzGxORPAN8gY03qnbTMnhqIwjeRJNOMOAzePRg4xVEEE2WvYsI9G2NMjOknA8hnuYbU3/hwLcKbjhc8+Q==}
@@ -1435,8 +1435,8 @@ packages:
     resolution: {integrity: sha512-o7npfeJE6wi6J9l0/5LKshFzZ2rMatRiCDwYeDQaOzqdzRJwALhX7mk/A/ecg6wjMu7wdZbmXfD2S/vpOg0bdQ==}
     hasBin: true
 
-  source-map-js@1.2.0:
-    resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
+  source-map-js@1.2.1:
+    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
   split-on-first@1.1.0:
@@ -1577,8 +1577,8 @@ packages:
   typescript-auto-import-cache@0.3.3:
     resolution: {integrity: sha512-ojEC7+Ci1ij9eE6hp8Jl9VUNnsEKzztktP5gtYNRMrTmfXVwA1PITYYAkpxCvvupdSYa/Re51B6KMcv1CTZEUA==}
 
-  typescript@5.5.4:
-    resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
+  typescript@5.6.2:
+    resolution: {integrity: sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -2101,9 +2101,9 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.21.2':
     optional: true
 
-  '@safe-global/safe-apps-provider@0.18.3(typescript@5.5.4)':
+  '@safe-global/safe-apps-provider@0.18.3(typescript@5.6.2)':
     dependencies:
-      '@safe-global/safe-apps-sdk': 9.1.0(typescript@5.5.4)
+      '@safe-global/safe-apps-sdk': 9.1.0(typescript@5.6.2)
       events: 3.3.0
     transitivePeerDependencies:
       - bufferutil
@@ -2111,10 +2111,10 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@safe-global/safe-apps-sdk@9.1.0(typescript@5.5.4)':
+  '@safe-global/safe-apps-sdk@9.1.0(typescript@5.6.2)':
     dependencies:
       '@safe-global/safe-gateway-typescript-sdk': 3.22.2
-      viem: 2.21.3(typescript@5.5.4)
+      viem: 2.21.3(typescript@5.6.2)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -2295,7 +2295,7 @@ snapshots:
 
   '@vscode/l10n@0.0.18': {}
 
-  '@walletconnect/core@2.16.0':
+  '@walletconnect/core@2.16.1':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -2308,8 +2308,8 @@ snapshots:
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.0
-      '@walletconnect/utils': 2.16.0
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
       lodash.isequal: 4.5.0
       uint8arrays: 3.1.0
@@ -2335,17 +2335,17 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/ethereum-provider@2.16.0(react@18.3.1)':
+  '@walletconnect/ethereum-provider@2.16.1(react@18.3.1)':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/modal': 2.6.2(react@18.3.1)
-      '@walletconnect/sign-client': 2.16.0
-      '@walletconnect/types': 2.16.0
-      '@walletconnect/universal-provider': 2.16.0
-      '@walletconnect/utils': 2.16.0
+      '@walletconnect/sign-client': 2.16.1
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/universal-provider': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -2482,16 +2482,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.16.0':
+  '@walletconnect/sign-client@2.16.1':
     dependencies:
-      '@walletconnect/core': 2.16.0
+      '@walletconnect/core': 2.16.1
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.0
-      '@walletconnect/utils': 2.16.0
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -2515,7 +2515,7 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/types@2.16.0':
+  '@walletconnect/types@2.16.1':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
@@ -2539,16 +2539,16 @@ snapshots:
       - ioredis
       - uWebSockets.js
 
-  '@walletconnect/universal-provider@2.16.0':
+  '@walletconnect/universal-provider@2.16.1':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
-      '@walletconnect/sign-client': 2.16.0
-      '@walletconnect/types': 2.16.0
-      '@walletconnect/utils': 2.16.0
+      '@walletconnect/sign-client': 2.16.1
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -2569,7 +2569,7 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
-  '@walletconnect/utils@2.16.0':
+  '@walletconnect/utils@2.16.1':
     dependencies:
       '@stablelib/chacha20poly1305': 1.0.1
       '@stablelib/hkdf': 1.0.1
@@ -2580,7 +2580,7 @@ snapshots:
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.0
+      '@walletconnect/types': 2.16.1
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -2612,13 +2612,13 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  abitype@1.0.5(typescript@5.5.4):
+  abitype@1.0.5(typescript@5.6.2):
     optionalDependencies:
-      typescript: 5.5.4
+      typescript: 5.6.2
 
-  abitype@1.0.6(typescript@5.5.4):
+  abitype@1.0.6(typescript@5.6.2):
     optionalDependencies:
-      typescript: 5.5.4
+      typescript: 5.6.2
 
   acorn@8.12.1: {}
 
@@ -2733,7 +2733,7 @@ snapshots:
   css-tree@2.3.1:
     dependencies:
       mdn-data: 2.0.30
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
 
   debug@4.3.7:
     dependencies:
@@ -3235,7 +3235,7 @@ snapshots:
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.1.0
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
 
   prettier-plugin-svelte@3.2.6(prettier@3.2.5)(svelte@3.59.2):
     dependencies:
@@ -3339,7 +3339,7 @@ snapshots:
     dependencies:
       chokidar: 3.6.0
       immutable: 4.3.7
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
 
   semver@7.6.3: {}
 
@@ -3372,7 +3372,7 @@ snapshots:
       minimist: 1.2.8
       sander: 0.5.1
 
-  source-map-js@1.2.0: {}
+  source-map-js@1.2.1: {}
 
   split-on-first@1.1.0: {}
 
@@ -3411,8 +3411,8 @@ snapshots:
       picocolors: 1.1.0
       sade: 1.8.1
       svelte: 4.2.19
-      svelte-preprocess: 5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@4.2.19)(typescript@5.5.4)
-      typescript: 5.5.4
+      svelte-preprocess: 5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@4.2.19)(typescript@5.6.2)
+      typescript: 5.6.2
     transitivePeerDependencies:
       - '@babel/core'
       - coffeescript
@@ -3439,9 +3439,9 @@ snapshots:
       prettier: 3.2.5
       prettier-plugin-svelte: 3.2.6(prettier@3.2.5)(svelte@3.59.2)
       svelte: 3.59.2
-      svelte-preprocess: 5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@3.59.2)(typescript@5.5.4)
-      svelte2tsx: 0.7.18(svelte@3.59.2)(typescript@5.5.4)
-      typescript: 5.5.4
+      svelte-preprocess: 5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@3.59.2)(typescript@5.6.2)
+      svelte2tsx: 0.7.18(svelte@3.59.2)(typescript@5.6.2)
+      typescript: 5.6.2
       typescript-auto-import-cache: 0.3.3
       vscode-css-languageservice: 6.3.1
       vscode-html-languageservice: 5.3.1
@@ -3460,7 +3460,7 @@ snapshots:
       - stylus
       - sugarss
 
-  svelte-preprocess@5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@3.59.2)(typescript@5.5.4):
+  svelte-preprocess@5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@3.59.2)(typescript@5.6.2):
     dependencies:
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
@@ -3471,9 +3471,9 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.45
       sass: 1.78.0
-      typescript: 5.5.4
+      typescript: 5.6.2
 
-  svelte-preprocess@5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@4.2.19)(typescript@5.5.4):
+  svelte-preprocess@5.1.4(postcss@8.4.45)(sass@1.78.0)(svelte@4.2.19)(typescript@5.6.2):
     dependencies:
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
@@ -3484,14 +3484,14 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.45
       sass: 1.78.0
-      typescript: 5.5.4
+      typescript: 5.6.2
 
-  svelte2tsx@0.7.18(svelte@3.59.2)(typescript@5.5.4):
+  svelte2tsx@0.7.18(svelte@3.59.2)(typescript@5.6.2):
     dependencies:
       dedent-js: 1.0.1
       pascal-case: 3.1.2
       svelte: 3.59.2
-      typescript: 5.5.4
+      typescript: 5.6.2
 
   svelte@3.59.2: {}
 
@@ -3541,7 +3541,7 @@ snapshots:
     dependencies:
       semver: 7.6.3
 
-  typescript@5.5.4: {}
+  typescript@5.6.2: {}
 
   ufo@1.5.4: {}
 
@@ -3597,19 +3597,19 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
 
-  viem@2.21.3(typescript@5.5.4):
+  viem@2.21.3(typescript@5.6.2):
     dependencies:
       '@adraffy/ens-normalize': 1.10.0
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.4.0
-      abitype: 1.0.5(typescript@5.5.4)
+      abitype: 1.0.5(typescript@5.6.2)
       isows: 1.0.4(ws@8.17.1)
       webauthn-p256: 0.0.5
       ws: 8.17.1
     optionalDependencies:
-      typescript: 5.5.4
+      typescript: 5.6.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
