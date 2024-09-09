@@ -17,6 +17,11 @@
     data: string | null,
     value: bigint | null,
   }
+  
+  type Network = {
+    chainId: bigint,
+    name: string,
+  };
 
   export let config : Config;
   export let args : Record<string, string[]>;
@@ -79,10 +84,7 @@
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
   let preparedTx : PreparedTransaction | null = null;
-  let network : {
-    chainId: bigint,
-    name: string,
-  } | null = null;
+  let network : Network|null = null;
   let loading : Record<string, boolean> = {};
 
   const abiLoader = new loaders.MultiABILoader([
@@ -282,6 +284,7 @@
 
   async function switchNetwork(chainid: number) {
     if (!signer) {
+      console.debug("[TransactionBuilder:switchNetwork] Not a signer, changing selector and skipping", { chainid });
       return networkSelectorComponent.change(chainid);
     }
     const browserProvider = provider as ethers.BrowserProvider;
@@ -292,23 +295,33 @@
       if ((error as Error).message.includes("Unrecognized chain ID")) {
         log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
       }
+      throw error;
+    }
+
+    const n = await browserProvider.getNetwork();
+    if (Number(n.chainId) !== chainid) {
+      log.error(`Failed to switch to chainId ${chainid}, still on ${n.chainId}`);
       return
     }
 
+    log.info(`Switched network on signer wallet, reconnecting`, { signer, chainid });
     connect({ provider: browserProvider, accounts: [from] });
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
     network = await browserProvider.getNetwork();
+    signer = await browserProvider.getSigner();
 
-    if (chainid !== Number(network.chainId)) {
-      await switchNetwork(chainid);
-      return connect(wallet);
+    console.log("XXX", "connect", { wallet, chainid, network, signer });
+    if (chainid === 0) {
+      chainid = Number(network.chainId);
+    } else if (chainid !== Number(network?.chainId)) {
+      console.debug("[TransactionBuilder:connect] Mismatched chainid, attempting to switch", { to: chainid, from: Number(network?.chainId) });
+      return switchNetwork(chainid);
     }
 
     provider = browserProvider;
-    signer = await browserProvider.getSigner();
     from = wallet.accounts[0];
 
     log.info(`Connected wallet: ${from}`);
@@ -354,11 +367,12 @@
 
   function onNetworkChanged(event: CustomEvent) {
     const n = event.detail.network;
-    if (n === undefined) {
-      return connectWalletComponent.methods.connect("any");
-    }
     if (signer) {
       return switchNetwork(n.chainid);
+    }
+    if (n === undefined || n.chainid === 0) {
+      chainid = 0; // Accept any
+      return connectWalletComponent.methods.connect("any");
     }
 
     // Fallback provider composed of all the network.rpc[] endpoints
@@ -368,13 +382,11 @@
       })
     );
     chainid = n.chainid;
-    provider.getNetwork().then(n => {
-      network = n;
+    provider.getNetwork().then(n_ => {
+      network = n_;
+      log.info(`Network changed to ${n.name}`, network, provider);
+      loadAddress();
     })
-
-    log.info(`Network changed to ${n.name}`, n, provider);
-
-    loadAddress();
   }
 
   function onInputsChanged(event: CustomEvent) {
@@ -425,7 +437,7 @@
   <section>
     <h2>From</h2>
     <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
-      <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
+      <svelte:fragment slot="connected-label">{ (network?.name !== "unknown" && network?.name) || (network?.chainId && `Chain ${network?.chainId}`) || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
 

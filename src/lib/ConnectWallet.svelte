@@ -78,6 +78,7 @@
       if (injected) {
         accounts = (await requestAccounts(injected)) || [];
         if (accounts.length > 0) {
+          console.info("ConnectWallet: Found injected provider, connected", {accounts});
           dispatch("connect", { provider: injected, accounts: accounts });
           return;
         }
