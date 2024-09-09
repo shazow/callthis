@@ -291,7 +291,7 @@
       log.info("[TransactionBuilder:switchNetwork] Any chain, skipping", { chainid: newChainId });
       return;
     }
-    const browserProvider = (wallet?.provider ?? provider) as ethers.BrowserProvider;
+    const browserProvider = signer.provider as ethers.BrowserProvider;
     const params = [{ "chainId": "0x" + newChainId.toString(16) }];
     try {
       await browserProvider.send("wallet_switchEthereumChain", params);
@@ -304,6 +304,7 @@
       // Reset dropdown
       const n = await browserProvider.getNetwork();
       networkSelectorComponent.change(Number(n.chainId));
+      network = n;
 
       throw error;
     }
@@ -324,17 +325,18 @@
       return;
     }
 
-    await updateProviderAndNetwork(browserProvider, newChainId);
+    await setProvider(wallet.provider, newChainId);
+    network = n;
   }
 
-  async function updateProviderAndNetwork(browserProvider: ethers.BrowserProvider, newChainId: number) {
-    network = await browserProvider.getNetwork();
+  async function setProvider(provider: any, newChainId: number) {
+    const browserProvider = new ethers.BrowserProvider(provider);
     signer = await browserProvider.getSigner();
     provider = browserProvider;
     from = await signer.getAddress();
     chainid = newChainId;
 
-    log.info(`Connected wallet: ${from}`);
+    log.info("Connected wallet", {from, chainid});
     if (to) toAddressComponent.resolve("connect");
   }
 
@@ -441,7 +443,7 @@
 
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
+    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect } on:changed={ (e) => switchNetwork(e.detail.chainid, { provider: e.detail.provider }) }>
       <svelte:fragment slot="connected-label">{ (network?.name !== "unknown" && network?.name) || (network?.chainId && `Chain ${network?.chainId}`) || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
