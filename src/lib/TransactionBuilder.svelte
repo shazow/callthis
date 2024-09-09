@@ -30,7 +30,7 @@
   let to : string = "";
   let editing : boolean = (to === "");
   let hint : string = "";
-  let chainid : number = 1;
+  let chainid : number = 0;
 
   let resetKey = {};
 
@@ -282,47 +282,57 @@
     }
   }
 
-  async function switchNetwork(chainid: number) {
+  async function switchNetwork(newChainId: number, wallet?: { provider: any }) {
     if (!signer) {
-      console.debug("[TransactionBuilder:switchNetwork] Not a signer, changing selector and skipping", { chainid });
-      return networkSelectorComponent.change(chainid);
+      log.info("[TransactionBuilder:switchNetwork] Not a signer, changing selector and skipping", { chainid: newChainId });
+      return networkSelectorComponent.change(newChainId);
     }
-    const browserProvider = provider as ethers.BrowserProvider;
-    const params = [{ "chainId": "0x" + chainid.toString(16) }];
+    if (newChainId === 0) {
+      log.info("[TransactionBuilder:switchNetwork] Any chain, skipping", { chainid: newChainId });
+      return;
+    }
+    const browserProvider = (wallet?.provider ?? provider) as ethers.BrowserProvider;
+    const params = [{ "chainId": "0x" + newChainId.toString(16) }];
     try {
       await browserProvider.send("wallet_switchEthereumChain", params);
+      log.info(`Switched network on signer wallet`, { chainid: newChainId });
     } catch (error) {
       if ((error as Error).message.includes("Unrecognized chain ID")) {
-        log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
+        log.error(`Requested to switch to chainId ${newChainId}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
       }
+
+      // Reset dropdown
+      const n = await browserProvider.getNetwork();
+      networkSelectorComponent.change(Number(n.chainId));
+
       throw error;
     }
 
-    const n = await browserProvider.getNetwork();
-    if (Number(n.chainId) !== chainid) {
-      log.error(`Failed to switch to chainId ${chainid}, still on ${n.chainId}`);
-      return
-    }
-
-    log.info(`Switched network on signer wallet, reconnecting`, { signer, chainid });
-    connect({ provider: browserProvider, accounts: [from] });
+    chainid = newChainId;
+    connectWalletComponent.methods.connect("any");
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
-    network = await browserProvider.getNetwork();
-    signer = await browserProvider.getSigner();
+    const n = await browserProvider.getNetwork();
+    const newChainId = Number(n.chainId);
 
-    console.log("XXX", "connect", { wallet, chainid, network, signer });
-    if (chainid === 0) {
-      chainid = Number(network.chainId);
-    } else if (chainid !== Number(network?.chainId)) {
-      console.debug("[TransactionBuilder:connect] Mismatched chainid, attempting to switch", { to: chainid, from: Number(network?.chainId) });
-      return switchNetwork(chainid);
+    if (chainid !== 0 && chainid !== newChainId) {
+      log.info("[TransactionBuilder:connect] Mismatched chainid, attempting to switch", { to: chainid, from: newChainId });
+      signer = await browserProvider.getSigner();
+      await switchNetwork(chainid, wallet);
+      return;
     }
 
+    await updateProviderAndNetwork(browserProvider, newChainId);
+  }
+
+  async function updateProviderAndNetwork(browserProvider: ethers.BrowserProvider, newChainId: number) {
+    network = await browserProvider.getNetwork();
+    signer = await browserProvider.getSigner();
     provider = browserProvider;
-    from = wallet.accounts[0];
+    from = await signer.getAddress();
+    chainid = newChainId;
 
     log.info(`Connected wallet: ${from}`);
     if (to) toAddressComponent.resolve("connect");
@@ -365,28 +375,23 @@
     editing = false;
   }
 
-  function onNetworkChanged(event: CustomEvent) {
+  async function onNetworkChanged(event: CustomEvent) {
     const n = event.detail.network;
     if (signer) {
-      return switchNetwork(n.chainid);
-    }
-    if (n === undefined || n.chainid === 0) {
+      await switchNetwork(n.chainid);
+    } else if (n === undefined || n.chainid === 0) {
       chainid = 0; // Accept any
-      return connectWalletComponent.methods.connect("any");
-    }
-
-    // Fallback provider composed of all the network.rpc[] endpoints
-    provider = new ethers.FallbackProvider(
-      n.rpc.map((url: string) => {
-        return new ethers.JsonRpcProvider(url)
-      })
-    );
-    chainid = n.chainid;
-    provider.getNetwork().then(n_ => {
-      network = n_;
+      connectWalletComponent.methods.connect("any");
+    } else {
+      // Fallback provider composed of all the network.rpc[] endpoints
+      provider = new ethers.FallbackProvider(
+        n.rpc.map((url: string) => new ethers.JsonRpcProvider(url))
+      );
+      chainid = n.chainid;
+      network = await provider.getNetwork();
       log.info(`Network changed to ${n.name}`, network, provider);
-      loadAddress();
-    })
+      await loadAddress();
+    }
   }
 
   function onInputsChanged(event: CustomEvent) {
