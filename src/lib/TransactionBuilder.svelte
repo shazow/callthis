@@ -607,14 +607,15 @@
   }
 
   .warning {
-    &:before {
-      content: "⚠️ ";
-    }
     margin: 0.5em 0 1em 0;
     font-weight: bold;
     color: rgb(200, 150, 50);
     text-align: center;
     width: 100%;
+
+    &:before {
+      content: "⚠️ ";
+    }
   }
 
   hr {

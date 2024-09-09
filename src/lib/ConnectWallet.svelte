@@ -267,8 +267,6 @@
     font-family: monospace;
   }
   .disconnect-button {
-    input { display: none; }
-
     width: 1em;
     height: 1em;
     cursor: pointer;
@@ -279,5 +277,7 @@
     background-repeat: no-repeat;
     background-size: 1em;
     background-position: bottom;
+
+    input { display: none; }
   }
 </style>
