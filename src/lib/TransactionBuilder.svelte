@@ -87,6 +87,10 @@
   let network : Network|null = null;
   let loading : Record<string, boolean> = {};
 
+  const env = {
+    ETHERSCAN_API_KEY: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
+  };
+
   const abiLoader = new loaders.MultiABILoader([
     new loaders.SourcifyABILoader(),
     new loaders.EtherscanABILoader({
@@ -237,16 +241,28 @@
 
     let r;
     loading.to = true;
+
+    const abiLoaders : Array<loaders.ABILoader> = [
+      new loaders.SourcifyABILoader({ chainId: chainid }),
+      new loaders.EtherscanABILoader({ apiKey: env.ETHERSCAN_API_KEY }),
+    ];
+    if (chainid !== 1) {
+      // Add mainnet just in case
+      abiLoaders.push(
+        new loaders.SourcifyABILoader({ chainId: 1 })
+      );
+    }
+
     try {
       r = await whatsabi.autoload(to, {
         provider,
-        abiLoader,
+
+        abiLoader: new loaders.MultiABILoader(abiLoaders),
+        signatureLookup: loaders.defaultSignatureLookup,
+
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
         addressResolver: resolver,
-        ... whatsabi.loaders.defaultsWithEnv({
-          SOURCIFY_CHAIN_ID: chainid,
-        }),
       });
     } finally {
       loading.to = false;
