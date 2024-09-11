@@ -82,6 +82,10 @@
           injected.on('chainChanged', (chainId: number) => {
             dispatch("changed", { provider: injected, accounts: accounts, chainid: Number(chainId) });
           });
+          injected.on('accountsChanged', (a: string[]) => {
+            accounts = a;
+            dispatch("changed", { provider: injected, accounts: accounts, chainid: chainid });
+          });
           console.info("ConnectWallet: Found injected provider, connected", {accounts});
           dispatch("connect", { provider: injected, accounts: accounts });
           return;
