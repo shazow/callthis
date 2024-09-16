@@ -31,6 +31,7 @@
   let editing : boolean = (to === "");
   let hint : string = "";
   let chainid : number = 0;
+  let switchedNetwork = false;
 
   let resetKey = {};
 
@@ -72,6 +73,7 @@
   let networkSelectorComponent : NetworkSelector;
 
   const defaultProvider = ethers.getDefaultProvider("homestead");
+  const defaultChainId = 1;
   let provider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
   let abi : ethers.Interface;
@@ -90,14 +92,6 @@
   const env = {
     ETHERSCAN_API_KEY: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
   };
-
-  const abiLoader = new loaders.MultiABILoader([
-    new loaders.SourcifyABILoader(),
-    new loaders.EtherscanABILoader({
-      // TODO: Move to config container
-      apiKey: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
-    }),
-  ]);
 
   async function loadHint(hint: string) {
     const maybeABI = ethers.Interface.from(["function " + hint]);
@@ -299,6 +293,7 @@
   }
 
   async function switchNetwork(newChainId: number, wallet?: { provider: any }) {
+    switchedNetwork = true;
     if (!signer) {
       log.info("[TransactionBuilder:switchNetwork] Not a signer, changing selector and skipping", { chainid: newChainId });
       return networkSelectorComponent.change(newChainId);
@@ -351,6 +346,7 @@
     provider = browserProvider;
     from = await signer.getAddress();
     chainid = newChainId;
+    switchedNetwork = true;
 
     log.info("Connected wallet", {from, chainid});
     if (to) toAddressComponent.resolve("connect");
@@ -454,7 +450,7 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>Network</h2>
-    <NetworkSelector bind:this={networkSelectorComponent} selected={chainid} on:change={ onNetworkChanged } />
+    <NetworkSelector bind:this={networkSelectorComponent} selected={switchedNetwork ? chainid : defaultChainId} on:change={ onNetworkChanged } />
   </section>
 
   <section>
