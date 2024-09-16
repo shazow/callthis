@@ -1,8 +1,8 @@
 {
   outputs = {
-    self,
     nixpkgs,
     flake-utils,
+    ...
   }:
     flake-utils.lib.eachDefaultSystem
     (system: let
@@ -12,7 +12,7 @@
     in {
       devShells.default = pkgs.mkShell {
         buildInputs = [
-          pkgs.nodejs_18
+          pkgs.nodejs_20
           pkgs.nodePackages.pnpm
         ];
 

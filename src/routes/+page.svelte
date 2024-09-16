@@ -34,18 +34,19 @@
     args: {},
     value: "",
     hint: "",
-    chainid: 1,
+    chainid: 0,
   };
 
   function getParams(p : URLSearchParams): Params {
     const to = p.get("to") || "";
+    const defaultChain = to ? 1 : 0; // 0 is "use whatever is injected"
     const calldata = p.get("data") || "";
     const args = {
       [calldata.slice(0, 10)]: p.getAll("arg")
     };
     const value = p.get("value") || "";
     const hint = p.get("hint") || "";
-    const chainid = Number(p.get("chainid") || 1);
+    const chainid = Number(p.get("chainid") || defaultChain);
     return {
       to, calldata, args, value, hint, chainid
     }

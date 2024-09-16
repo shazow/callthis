@@ -14,6 +14,7 @@
   interface InjectedProvider {
     enable?: () => Promise<string[]>;
     request?: (request: { method: string }) => Promise<string[]>;
+    on: (event: string, callback: (context: any) => void) => void;
   }
 
   interface EthereumWindow extends Window {
@@ -78,6 +79,14 @@
       if (injected) {
         accounts = (await requestAccounts(injected)) || [];
         if (accounts.length > 0) {
+          injected.on('chainChanged', (chainId: number) => {
+            dispatch("changed", { provider: injected, accounts: accounts, chainid: Number(chainId) });
+          });
+          injected.on('accountsChanged', (a: string[]) => {
+            accounts = a;
+            dispatch("changed", { provider: injected, accounts: accounts, chainid: chainid });
+          });
+          console.info("ConnectWallet: Found injected provider, connected", {accounts});
           dispatch("connect", { provider: injected, accounts: accounts });
           return;
         }
@@ -262,8 +271,6 @@
     font-family: monospace;
   }
   .disconnect-button {
-    input { display: none; }
-
     width: 1em;
     height: 1em;
     cursor: pointer;
@@ -274,5 +281,7 @@
     background-repeat: no-repeat;
     background-size: 1em;
     background-position: bottom;
+
+    input { display: none; }
   }
 </style>

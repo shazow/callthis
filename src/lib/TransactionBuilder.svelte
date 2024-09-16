@@ -17,6 +17,11 @@
     data: string | null,
     value: bigint | null,
   }
+  
+  type Network = {
+    chainId: bigint,
+    name: string,
+  };
 
   export let config : Config;
   export let args : Record<string, string[]>;
@@ -25,7 +30,8 @@
   let to : string = "";
   let editing : boolean = (to === "");
   let hint : string = "";
-  let chainid : number = 1;
+  let chainid : number = 0;
+  let switchedNetwork = false;
 
   let resetKey = {};
 
@@ -67,6 +73,7 @@
   let networkSelectorComponent : NetworkSelector;
 
   const defaultProvider = ethers.getDefaultProvider("homestead");
+  const defaultChainId = 1;
   let provider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
   let abi : ethers.Interface;
@@ -79,19 +86,12 @@
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
   let preparedTx : PreparedTransaction | null = null;
-  let network : {
-    chainId: bigint,
-    name: string,
-  } | null = null;
+  let network : Network|null = null;
   let loading : Record<string, boolean> = {};
 
-  const abiLoader = new loaders.MultiABILoader([
-    new loaders.SourcifyABILoader(),
-    new loaders.EtherscanABILoader({
-      // TODO: Move to config container
-      apiKey: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
-    }),
-  ]);
+  const env = {
+    ETHERSCAN_API_KEY: "SHT8M9JSGR62U5U7YVFUSTPG41IVR1F7ND",
+  };
 
   async function loadHint(hint: string) {
     const maybeABI = ethers.Interface.from(["function " + hint]);
@@ -235,16 +235,28 @@
 
     let r;
     loading.to = true;
+
+    const abiLoaders : Array<loaders.ABILoader> = [
+      new loaders.SourcifyABILoader({ chainId: chainid }),
+      new loaders.EtherscanABILoader({ apiKey: env.ETHERSCAN_API_KEY }),
+    ];
+    if (chainid !== 1) {
+      // Add mainnet just in case
+      abiLoaders.push(
+        new loaders.SourcifyABILoader({ chainId: 1 })
+      );
+    }
+
     try {
       r = await whatsabi.autoload(to, {
         provider,
-        abiLoader,
+
+        abiLoader: new loaders.MultiABILoader(abiLoaders),
+        signatureLookup: loaders.defaultSignatureLookup,
+
         followProxies: true,
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
         addressResolver: resolver,
-        ... whatsabi.loaders.defaultsWithEnv({
-          SOURCIFY_CHAIN_ID: chainid,
-        }),
       });
     } finally {
       loading.to = false;
@@ -280,38 +292,63 @@
     }
   }
 
-  async function switchNetwork(chainid: number) {
+  async function switchNetwork(newChainId: number, wallet?: { provider: any }) {
+    switchedNetwork = true;
     if (!signer) {
-      return networkSelectorComponent.change(chainid);
+      log.info("[TransactionBuilder:switchNetwork] Not a signer, changing selector and skipping", { chainid: newChainId });
+      return networkSelectorComponent.change(newChainId);
     }
-    const browserProvider = provider as ethers.BrowserProvider;
-    const params = [{ "chainId": "0x" + chainid.toString(16) }];
+    if (newChainId === 0) {
+      log.info("[TransactionBuilder:switchNetwork] Any chain, skipping", { chainid: newChainId });
+      return;
+    }
+    const browserProvider = signer.provider as ethers.BrowserProvider;
+    const params = [{ "chainId": "0x" + newChainId.toString(16) }];
     try {
       await browserProvider.send("wallet_switchEthereumChain", params);
+      log.info(`Switched network on signer wallet`, { chainid: newChainId });
     } catch (error) {
       if ((error as Error).message.includes("Unrecognized chain ID")) {
-        log.error(`Requested to switch to chainId ${chainid}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
+        log.error(`Requested to switch to chainId ${newChainId}, but wallet is not aware of it. Use chainlist.org to add chain details first.`);
       }
-      return
+
+      // Reset dropdown
+      const n = await browserProvider.getNetwork();
+      networkSelectorComponent.change(Number(n.chainId));
+      network = n;
+
+      throw error;
     }
 
-    connect({ provider: browserProvider, accounts: [from] });
+    chainid = newChainId;
+    connectWalletComponent.methods.connect("any");
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
     const browserProvider = new ethers.BrowserProvider(wallet.provider);
-    network = await browserProvider.getNetwork();
+    const n = await browserProvider.getNetwork();
+    const newChainId = Number(n.chainId);
 
-    if (chainid !== Number(network.chainId)) {
-      await switchNetwork(chainid);
-      return connect(wallet);
+    if (chainid !== 0 && chainid !== newChainId) {
+      log.info("[TransactionBuilder:connect] Mismatched chainid, attempting to switch", { to: chainid, from: newChainId });
+      signer = await browserProvider.getSigner();
+      await switchNetwork(chainid, wallet);
+      return;
     }
 
-    provider = browserProvider;
-    signer = await browserProvider.getSigner();
-    from = wallet.accounts[0];
+    await setProvider(wallet.provider, newChainId);
+    network = n;
+  }
 
-    log.info(`Connected wallet: ${from}`);
+  async function setProvider(provider: any, newChainId: number) {
+    const browserProvider = new ethers.BrowserProvider(provider);
+    signer = await browserProvider.getSigner();
+    provider = browserProvider;
+    from = await signer.getAddress();
+    chainid = newChainId;
+    switchedNetwork = true;
+
+    log.info("Connected wallet", {from, chainid});
     if (to) toAddressComponent.resolve("connect");
   }
 
@@ -352,29 +389,23 @@
     editing = false;
   }
 
-  function onNetworkChanged(event: CustomEvent) {
+  async function onNetworkChanged(event: CustomEvent) {
     const n = event.detail.network;
-    if (n === undefined) {
-      return connectWalletComponent.methods.connect("any");
-    }
     if (signer) {
-      return switchNetwork(n.chainid);
+      await switchNetwork(n.chainid);
+    } else if (n === undefined || n.chainid === 0) {
+      chainid = 0; // Accept any
+      connectWalletComponent.methods.connect("any");
+    } else {
+      // Fallback provider composed of all the network.rpc[] endpoints
+      provider = new ethers.FallbackProvider(
+        n.rpc.map((url: string) => new ethers.JsonRpcProvider(url))
+      );
+      chainid = n.chainid;
+      network = await provider.getNetwork();
+      log.info(`Network changed to ${n.name}`, network, provider);
+      await loadAddress();
     }
-
-    // Fallback provider composed of all the network.rpc[] endpoints
-    provider = new ethers.FallbackProvider(
-      n.rpc.map((url: string) => {
-        return new ethers.JsonRpcProvider(url)
-      })
-    );
-    chainid = n.chainid;
-    provider.getNetwork().then(n => {
-      network = n;
-    })
-
-    log.info(`Network changed to ${n.name}`, n, provider);
-
-    loadAddress();
   }
 
   function onInputsChanged(event: CustomEvent) {
@@ -385,7 +416,7 @@
     }
     const context = event.detail as { values: string[], resolved: string[] };
     calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
-    functionArgs = context.values;
+    functionArgs = context.resolved;
   }
 
   type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
@@ -419,13 +450,13 @@
 <form bind:this={form} on:submit|preventDefault="{handleSubmit}" class="builder">
   <section>
     <h2>Network</h2>
-    <NetworkSelector bind:this={networkSelectorComponent} selected={chainid} on:change={ onNetworkChanged } />
+    <NetworkSelector bind:this={networkSelectorComponent} selected={switchedNetwork ? chainid : defaultChainId} on:change={ onNetworkChanged } />
   </section>
 
   <section>
     <h2>From</h2>
-    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect }>
-      <svelte:fragment slot="connected-label">{ network?.name || "Connected" }</svelte:fragment>
+    <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect } on:changed={ (e) => switchNetwork(e.detail.chainid, { provider: e.detail.provider }) }>
+      <svelte:fragment slot="connected-label">{ (network?.name !== "unknown" && network?.name) || (network?.chainId && `Chain ${network?.chainId}`) || "Connected" }</svelte:fragment>
     </ConnectWallet>
   </section>
 
@@ -588,14 +619,15 @@
   }
 
   .warning {
-    &:before {
-      content: "⚠️ ";
-    }
     margin: 0.5em 0 1em 0;
     font-weight: bold;
     color: rgb(200, 150, 50);
     text-align: center;
     width: 100%;
+
+    &:before {
+      content: "⚠️ ";
+    }
   }
 
   hr {
