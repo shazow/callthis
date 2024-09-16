@@ -15,8 +15,8 @@ importers:
         specifier: ^9.1.0
         version: 9.1.0(typescript@5.6.2)
       '@shazow/whatsabi':
-        specifier: ^0.13.2
-        version: 0.13.2(@noble/hashes@1.5.0)
+        specifier: ^0.14.1
+        version: 0.14.1(@noble/hashes@1.5.0)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.2
         version: 3.1.2(svelte@4.2.19)(vite@5.4.3(@types/node@18.15.13)(sass@1.78.0))
@@ -486,8 +486,8 @@ packages:
   '@scure/bip39@1.4.0':
     resolution: {integrity: sha512-BEEm6p8IueV/ZTfQLp/0vhw4NPnT9oWf5+28nvmeUICjP99f4vr2d+qc7AVGDDtwRep6ifR43Yed9ERVmiITzw==}
 
-  '@shazow/whatsabi@0.13.2':
-    resolution: {integrity: sha512-omF4QMrGeXY1fW9EgkvtyHW9qEVF9jIE8tRlpbs+PcK4fzowOTEN0BowLX+rdylucnZ8fuWnuva0upU9dqDYCg==}
+  '@shazow/whatsabi@0.14.1':
+    resolution: {integrity: sha512-eveJrlAPVmJG+93M2xKw0IUhlGtKjQBuJsdTPhO6HkIhKSj+9tBZo9KieNGi2+9YUrqeW9/6APb0RGfnFPe7CQ==}
     peerDependencies:
       '@noble/hashes': ^1
 
@@ -2136,7 +2136,7 @@ snapshots:
       '@noble/hashes': 1.5.0
       '@scure/base': 1.1.8
 
-  '@shazow/whatsabi@0.13.2(@noble/hashes@1.5.0)':
+  '@shazow/whatsabi@0.14.1(@noble/hashes@1.5.0)':
     dependencies:
       '@noble/hashes': 1.5.0
       ethers: 6.13.2
