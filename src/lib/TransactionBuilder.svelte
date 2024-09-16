@@ -416,7 +416,7 @@
     }
     const context = event.detail as { values: string[], resolved: string[] };
     calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
-    functionArgs = context.values;
+    functionArgs = context.resolved;
   }
 
   type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
