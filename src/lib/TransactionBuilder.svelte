@@ -74,7 +74,7 @@
 
   const defaultProvider = ethers.getDefaultProvider("homestead");
   const defaultChainId = 1;
-  let provider : ethers.Provider = defaultProvider;
+  let activeProvider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
   let abi : ethers.Interface;
   let functions : ethers.FunctionFragment[];
@@ -104,7 +104,7 @@
     updateFunction();
     log.info('Loaded partial ABI from hint');
 
-    if (provider) await toAddressComponent.resolve("mount");
+    if (activeProvider) await toAddressComponent.resolve("mount");
     else if (to) await loadAddress();
   }
 
@@ -150,9 +150,9 @@
     }
     result = null;
     preparedTx = null;
-    log.info("Submitting preview transaction", { from, toResolved, calldata, value, provider });
+    log.info("Submitting preview transaction", { from, toResolved, calldata, value, provider: activeProvider });
 
-    if (!provider) {
+    if (!activeProvider) {
       return log.error("Ethereum provider not available");
     }
 
@@ -170,7 +170,7 @@
     loading.submit = true;
     let stale = false;
     try {
-      const r = await provider.call(tx);
+      const r = await activeProvider.call(tx);
       result = {
         status: "ok",
       };
@@ -227,7 +227,7 @@
   async function loadAddress(event?: CustomEvent) {
     result = null;
 
-    if (!provider || !to) {
+    if (!activeProvider || !to) {
       return;
     }
     if (event) toResolved = event.detail.resolved;
@@ -249,7 +249,7 @@
 
     try {
       r = await whatsabi.autoload(to, {
-        provider,
+        provider: activeProvider,
 
         abiLoader: new loaders.MultiABILoader(abiLoaders),
         signatureLookup: loaders.defaultSignatureLookup,
@@ -343,7 +343,7 @@
   async function setProvider(provider: any, newChainId: number) {
     const browserProvider = new ethers.BrowserProvider(provider);
     signer = await browserProvider.getSigner();
-    provider = browserProvider;
+    activeProvider = browserProvider;
     from = await signer.getAddress();
     chainid = newChainId;
     switchedNetwork = true;
@@ -354,7 +354,7 @@
 
   async function disconnect() {
     log.info("Wallet disconnected");
-    provider = defaultProvider;
+    activeProvider = defaultProvider;
     signer = undefined;
     network = null;
   }
@@ -398,12 +398,12 @@
       connectWalletComponent.methods.connect("any");
     } else {
       // Fallback provider composed of all the network.rpc[] endpoints
-      provider = new ethers.FallbackProvider(
+      activeProvider = new ethers.FallbackProvider(
         n.rpc.map((url: string) => new ethers.JsonRpcProvider(url))
       );
       chainid = n.chainid;
-      network = await provider.getNetwork();
-      log.info(`Network changed to ${n.name}`, network, provider);
+      network = await activeProvider.getNetwork();
+      log.info(`Network changed to ${n.name}`, network, activeProvider);
       await loadAddress();
     }
   }
@@ -539,7 +539,7 @@
     {:else}
     <button class="icon-edit" on:click|preventDefault={ () => { editing = true }}>Edit</button>
     {/if}
-    <input type="submit" class="icon-call" value="Preview Call" disabled={ !provider || !to || loading.submit }>
+    <input type="submit" class="icon-call" value="Preview Call" disabled={ !activeProvider || !to || loading.submit }>
   </section>
 
   {#if result}
