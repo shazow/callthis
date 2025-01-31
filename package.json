@@ -11,24 +11,24 @@
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/adapter-static": "^3.0.8",
-		"@sveltejs/kit": "^2.15.1",
+		"@sveltejs/kit": "^2.16.1",
 		"abitype": "^1.0.8",
-		"sass": "^1.83.0",
+		"sass": "^1.83.4",
 		"svelte": "^4.2.19",
-		"svelte-check": "^4.1.1",
-		"svelte-language-server": "^0.17.8",
+		"svelte-check": "^4.1.4",
+		"svelte-language-server": "^0.17.10",
 		"tslib": "^2.8.1",
-		"typescript": "^5.7.2",
-		"vite": "^5.4.11"
+		"typescript": "^5.7.3",
+		"vite": "^5.4.14"
 	},
 	"type": "module",
 	"dependencies": {
 		"@safe-global/safe-apps-provider": "^0.18.5",
 		"@safe-global/safe-apps-sdk": "^9.1.0",
-		"@shazow/whatsabi": "^0.18.0",
+		"@shazow/whatsabi": "^0.19.0",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
-		"@walletconnect/ethereum-provider": "^2.17.3",
+		"@walletconnect/ethereum-provider": "^2.18.0",
 		"@walletconnect/modal": "^2.7.0",
-		"ethers": "^6.13.4"
+		"ethers": "^6.13.5"
 	}
 }
