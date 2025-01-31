@@ -10,6 +10,7 @@
   import Value from '$lib/contract/Value.svelte';
   import InputTree from '$lib/contract/InputTree.svelte';
   import type { Config } from '$lib/ConnectWallet.svelte';
+  import type { Params } from '$lib/types';
 
   type PreparedTransaction = {
     from: string,
@@ -27,6 +28,7 @@
   export let args : Record<string, string[]>;
   let calldata : string = "";
   let value : string = "";
+  let expectFrom : string = "";
   let to : string = "";
   let editing : boolean = (to === "");
   let hint : string = "";
@@ -35,10 +37,11 @@
 
   let resetKey = {};
 
-  export async function load(params: {calldata: string, value: string, to: string, hint: string, chainid: number}) {
+  export async function load(params: Params) {
     calldata = params.calldata;
     value = params.value;
     to = params.to;
+    expectFrom = params.from && await resolver(params.from) || "";
     hint = params.hint;
     editing = (to === "");
     loading = {};
@@ -458,6 +461,10 @@
     <ConnectWallet bind:this={connectWalletComponent} chainid={ chainid } config={ config } on:connect={ (e) => connect(e.detail) } on:disconnect={ disconnect } on:changed={ (e) => switchNetwork(e.detail.chainid, { provider: e.detail.provider }) }>
       <svelte:fragment slot="connected-label">{ (network?.name !== "unknown" && network?.name) || (network?.chainId && `Chain ${network?.chainId}`) || "Connected" }</svelte:fragment>
     </ConnectWallet>
+
+    {#if from && expectFrom && expectFrom !== from}
+    <p class="warning">Does not match expected "from" address:<br/><code>{expectFrom}</code></p>
+    {/if}
   </section>
 
   <section>

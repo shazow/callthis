@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
 
   import TransactionBuilder from '$lib/TransactionBuilder.svelte';
+  import type { Params } from '$lib/types';
   import type { Config } from '$lib/ConnectWallet.svelte';
 
   const wcConfig : Config = {
@@ -20,15 +21,8 @@
   }
 
 
-  type Params = {
-    to: string,
-    calldata: string,
-    args: Record<string, string[]>,
-    value: string,
-    hint: string,
-    chainid: number,
-  };
   let params : Params = {
+    from: "",
     to: "",
     calldata: "",
     args: {},
@@ -38,6 +32,7 @@
   };
 
   function getParams(p : URLSearchParams): Params {
+    const from = p.get("from") || "";
     const to = p.get("to") || "";
     const defaultChain = to ? 1 : 0; // 0 is "use whatever is injected"
     const calldata = p.get("data") || "";
@@ -48,7 +43,7 @@
     const hint = p.get("hint") || "";
     const chainid = Number(p.get("chainid") || defaultChain);
     return {
-      to, calldata, args, value, hint, chainid
+      from, to, calldata, args, value, hint, chainid
     }
   }
 
