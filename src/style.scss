@@ -74,18 +74,21 @@ footer {
   box-sizing: border-box;
   width: 100%;
   flex-shrink: 0;
+  display: flex;
 
   font-weight: bold;
   padding: 1.25em 1em;
 
   a {
-    display: flex;
-    align-items: center;
     text-decoration: none;
     color: var(--text-color);
-    span {
-      margin-left: 0.2rem;
-    }
+  }
+  div {
+    margin-right: 1.5em;
+  }
+  svg {
+    vertical-align: text-top;
+    margin-right: 0.1em;
   }
 }
 
@@ -211,6 +214,7 @@ form {
   background: var(--header-bg-color);
   padding: 0.5em;
   line-height: 1.2em;
+  margin-bottom: 2em;
 
   h3 {
     color: var(--header-text-color);
