@@ -1,0 +1,26 @@
+name: Deploy with Blumen
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm i
+      - name: Build website
+        run: pnpm build
+      - name: Deploy the site
+        run: blumen deploy ./build --strict --ens ${{ vars.BLUMEN_ENS }}
+        env:
+          BLUMEN_PINATA_TOKEN: ${{ secrets.BLUMEN_PINATA_TOKEN }}
+          BLUMEN_LIGHTHOUSE_TOKEN: ${{ secrets.BLUMEN_LIGHTHOUSE_TOKEN }}
+          BLUMEN_PK: ${{ secrets.BLUMEN_PK }}
