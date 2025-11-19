@@ -32,6 +32,7 @@
 		"@shazow/whatsabi": "^0.23.0",
 		"@walletconnect/ethereum-provider": "^2.23.0",
 		"@walletconnect/modal": "^2.7.0",
-		"ethers": "^6.15.0"
+		"ethers": "^6.15.0",
+		"viem": "^2.39.3"
 	}
 }

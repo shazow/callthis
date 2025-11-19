@@ -1,15 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { ethers } from "ethers";
+  import type { AbiParameter } from "viem";
 
   import { fromParamType, toValues, setValues } from "./param.js";
   import Input from "./Input.svelte";
 
-  export let inputs: readonly ethers.ParamType[];
+  export let inputs: readonly AbiParameter[];
   export let initialValues: string[] = [];
 
-  $: params = inputs.map((t: ethers.ParamType, idx: number) => {
+  $: params = inputs.map((t: AbiParameter, idx: number) => {
     const p = fromParamType(t)
     const v = initialValues && initialValues[idx];
     if (v) setValues(p, v);

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Param } from "./param.js";
   import { validate, extendArray, shrinkArray } from "./param.js";
+  import type { AbiParameter } from "viem";
   import Address from "./Address.svelte";
   import InputBasic from "./InputBasic.svelte";
   import InputBytes from "./InputBytes.svelte";
@@ -13,19 +14,19 @@
 
 {#if input.children }
 <details open class="input">
-  <summary><span class="type">{input.type.name} {input.type.baseType}</span></summary>
+  <summary><span class="type">{input.type.name} {input.type.type}</span></summary>
   {#each input.children as p}
     <svelte:self input={ p } componentArgs={ componentArgs } />
   {/each}
 
   {#if input.childrenExtendType}
-    <p class="type">{input.childrenExtendType.type.format("full")}</p>
+    <p class="type">{input.childrenExtendType.type.type}</p>
     <button on:click|preventDefault={ () => { input = extendArray(input) } }>+</button>
     <button on:click|preventDefault={ () => { input = shrinkArray(input) } } disabled={ !input.children.length }>-</button>
   {/if}
 </details>
 
-{:else if input.type.baseType === "address"}
+{:else if input.type.type === "address"}
   <Address required bind:value={ input.value } bind:resolved={ input.resolved } resolver={ componentArgs.resolver } on:change={ componentArgs.onChange }><span>{input.type.name}</span></Address>
 
 {:else if input.type.type.startsWith("bytes")}
@@ -36,7 +37,7 @@
     bytes={ Number(input.type.type.slice("bytes".length)) }
     >
     <span>{input.type.name}</span>
-    <aside class="type">{input.type.baseType}</aside>
+    <aside class="type">{input.type.type}</aside>
   </InputBytes>
 
 {:else}
@@ -46,7 +47,7 @@
     validate={(v) => validate(input.type, v)}
     >
     <span>{input.type.name}</span>
-    <aside class="type">{input.type.baseType}</aside>
+    <aside class="type">{input.type.type}</aside>
   </InputBasic>
 {/if}
 
