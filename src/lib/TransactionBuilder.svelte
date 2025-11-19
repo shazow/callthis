@@ -1,7 +1,29 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { pushState } from '$app/navigation';
-  import { ethers } from "ethers";
+  import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    custom,
+    fallback,
+    parseEther,
+    encodeFunctionData,
+    decodeFunctionResult,
+    decodeFunctionData,
+    toFunctionSelector,
+    toFunctionSignature,
+    type PublicClient,
+    type WalletClient,
+    type AbiFunction,
+    type Hex,
+    type Address as ViemAddress,
+    type Abi,
+    type Transport,
+    type Account
+  } from "viem";
+  import { mainnet } from "viem/chains";
+  import { normalize } from 'viem/ens';
   import { whatsabi, loaders } from "@shazow/whatsabi";
   import ConnectWallet from '$lib/ConnectWallet.svelte';
   import NetworkSelector from '$lib/NetworkSelector.svelte';
@@ -13,15 +35,17 @@
   import type { Params } from '$lib/types';
 
   type PreparedTransaction = {
-    from: string,
-    to: string,
-    data: string | null,
-    value: bigint | null,
+    account?: ViemAddress,
+    to: ViemAddress,
+    data: Hex | undefined,
+    value: bigint | undefined,
+    chain?: any
   }
   
   type Network = {
     chainId: bigint,
     name: string,
+    rpc: string[]
   };
 
   export let config : Config;
@@ -75,17 +99,21 @@
   let connectWalletComponent : ConnectWallet;
   let networkSelectorComponent : NetworkSelector;
 
-  const defaultProvider = ethers.getDefaultProvider("homestead");
+  // Default provider (mainnet)
+  const defaultProvider = createPublicClient({
+    chain: mainnet,
+    transport: http()
+  });
   const defaultChainId = 1;
-  let activeProvider : ethers.Provider = defaultProvider;
-  let signer : ethers.Signer | undefined = undefined;
-  let abi : ethers.Interface;
-  let functions : ethers.FunctionFragment[];
+  let activeProvider : PublicClient = defaultProvider;
+  let signer : WalletClient | undefined = undefined;
+  let abi : Abi = [];
+  let functions : AbiFunction[] = [];
   let functionsFor : string;
-  let selectedFunction : string;
-  let selectedFragment : ethers.FunctionFragment | undefined;
+  let selectedFunction : string; // selector (sighash)
+  let selectedFragment : AbiFunction | undefined;
   let result : { status: "error"|"ok", message?:string, value?:any} | null = null;
-  let receipt : ethers.TransactionReceipt | null;
+  let receipt : any | null; // TransactionReceipt
   let form : HTMLFormElement;
   let functionArgs : Array<string>;
   let preparedTx : PreparedTransaction | null = null;
@@ -97,11 +125,12 @@
   };
 
   async function loadHint(hint: string) {
-    const maybeABI = ethers.Interface.from(["function " + hint]);
-    const fn = maybeABI.getFunction(calldata.slice(0, 10));
+    const { parseAbi } = await import("viem");
+    const maybeABI = parseAbi(["function " + hint]);
+    const fn = maybeABI[0] as AbiFunction;
     if (!fn) return;
 
-    selectedFunction = fn.selector;
+    selectedFunction = toFunctionSelector(fn);
     abi = maybeABI;
     functions = [fn];
     updateFunction();
@@ -126,24 +155,47 @@
     }
   };
 
-  function resolver(value: string): Promise<string> {
+  async function resolver(value: string): Promise<string> {
     log.info(`Resolving address: ${value}`);
-    // TODO: Resolve relative to some chainID?
-    const r = ethers.resolveAddress(value, defaultProvider);
-    if (r instanceof Promise) return r;
-    return Promise.resolve(r);
+    if (value.endsWith(".eth")) {
+        const r = await defaultProvider.getEnsAddress({ name: normalize(value) });
+        return r || value;
+    }
+    return value;
   };
 
   function prepareTransaction(from: string, to: string, calldata: string, value: string): PreparedTransaction {
     const tx : PreparedTransaction = {
-      from: from,
-      to: to,
-      data: null,
-      value: null,
+      account: from as ViemAddress,
+      to: to as ViemAddress,
+      data: calldata ? calldata as Hex : undefined,
+      value: (value && value !== "0") ? parseEther(value) : undefined,
     };
-    if (calldata) tx.data = calldata;
-    if (value && value !== "0") tx.value = ethers.parseEther(value);
     return tx;
+  }
+
+  function formatResult(res: any): string {
+      if (typeof res === 'bigint') {
+          return res.toString();
+      }
+      if (Array.isArray(res)) {
+          return `[${res.map(formatResult).join(", ")}]`;
+      }
+      if (typeof res === 'object' && res !== null) {
+          // Try to stringify
+          try {
+              // Check if it has a custom toString or something useful?
+              // JSON stringify handles bigints poorly by default, let's use replacer
+              return JSON.stringify(res, (key, value) =>
+                  typeof value === 'bigint'
+                      ? value.toString()
+                      : value // return everything else unchanged
+              );
+          } catch {
+              return res.toString();
+          }
+      }
+      return String(res);
   }
 
   async function handleSubmit() {
@@ -166,21 +218,25 @@
 
     const tx = prepareTransaction(from, toResolved || to, calldata, value);
     if (!tx.to) {
-      // TODO: We can remove this check once ethers.js v6 bug is fixed?
       return log.error("Failed resolving 'to' address");
     }
 
     loading.submit = true;
     let stale = false;
     try {
+      // call
       const r = await activeProvider.call(tx);
       result = {
         status: "ok",
       };
-      if (selectedFragment && selectedFragment.outputs?.length > 0) {
-        // TODO: Use this function once its implemented: abi.parseCallResult(r)
-        const res = abi.decodeFunctionResult(selectedFragment, r);
-        result.value = res.toString();
+
+      if (selectedFragment && selectedFragment.outputs && selectedFragment.outputs.length > 0) {
+        const res = decodeFunctionResult({
+            abi: [selectedFragment],
+            functionName: selectedFragment.name,
+            data: r.data || "0x"
+        });
+        result.value = formatResult(res);
       }
       log.info("Loaded result", result);
 
@@ -219,9 +275,19 @@
 
     loading.submit = true;
     try {
-      let r = await signer.sendTransaction(preparedTx);
-      log.info("Waiting for transaction: ", r.hash);
-      receipt = await r.wait();
+      // sendTransaction
+      // Need to ensure account is provided properly
+      const account = preparedTx.account || from as ViemAddress;
+
+      let hash = await signer.sendTransaction({
+        ...preparedTx,
+        account: account, // Explicitly pass account
+        chain: null // Let the wallet decide or use current chain
+      });
+      log.info("Waiting for transaction: ", hash);
+      receipt = await activeProvider.waitForTransactionReceipt({ hash });
+    } catch (err) {
+        log.error(err as Error);
     } finally {
       loading.submit = false;
     }
@@ -252,7 +318,7 @@
 
     try {
       r = await whatsabi.autoload(to, {
-        provider: activeProvider,
+        provider: activeProvider as any,
 
         abiLoader: new loaders.MultiABILoader(abiLoaders),
         signatureLookup: loaders.defaultSignatureLookup,
@@ -261,6 +327,10 @@
         onProgress: (progress, ...args: any[]) => log.info("WhatsABI:", progress, args),
         addressResolver: resolver,
       });
+    } catch (err) {
+        log.error("WhatsABI failed: " + err);
+        loading.to = false;
+        return;
     } finally {
       loading.to = false;
     }
@@ -269,12 +339,17 @@
 
     selectedFunction = calldata.slice(0, 10);
     if (functions.length === 0 || r.abi.length > 0) {
-      abi = ethers.Interface.from(r.abi);
+      abi = r.abi as Abi;
       functions = [];
-      abi.forEachFunction(f => functions.push(f));
+      // Filter for functions
+      for (const item of abi) {
+          if (item.type === 'function') {
+              functions.push(item);
+          }
+      }
     } else if (r.abi.length === 0) {
       functions = [];
-      abi = ethers.Interface.from([]);
+      abi = [];
     }
 
     updateFunction();
@@ -286,12 +361,23 @@
     if (calldata.slice(0, 10) !== selectedFunction) {
       calldata = selectedFunction
     }
-    selectedFragment = functions.find(f => f.selector === selectedFunction);
+
+    selectedFragment = functions.find(f => toFunctionSelector(f) === selectedFunction);
     functionArgs = args[selectedFunction] || [];
 
     if (calldata.length > 10 && selectedFragment) {
       // Calldata has args that we can parse
-      functionArgs = abi.decodeFunctionData(selectedFragment, calldata);
+      try {
+        const decoded = decodeFunctionData({
+            abi: [selectedFragment],
+            data: calldata as Hex
+        });
+        if (decoded.args && Array.isArray(decoded.args)) {
+             functionArgs = decoded.args.map(a => a.toString());
+        }
+      } catch (e) {
+          console.error("Failed to decode calldata", e);
+      }
     }
   }
 
@@ -305,10 +391,10 @@
       log.info("[TransactionBuilder:switchNetwork] Any chain, skipping", { chainid: newChainId });
       return;
     }
-    const browserProvider = signer.provider as ethers.BrowserProvider;
-    const params = [{ "chainId": "0x" + newChainId.toString(16) }];
+
+    // WalletClient switchChain
     try {
-      await browserProvider.send("wallet_switchEthereumChain", params);
+      await signer.switchChain({ id: newChainId });
       log.info(`Switched network on signer wallet`, { chainid: newChainId });
     } catch (error) {
       if ((error as Error).message.includes("Unrecognized chain ID")) {
@@ -316,9 +402,8 @@
       }
 
       // Reset dropdown
-      const n = await browserProvider.getNetwork();
-      networkSelectorComponent.change(Number(n.chainId));
-      network = n;
+      const chainId = await signer.getChainId();
+      networkSelectorComponent.change(chainId);
 
       throw error;
     }
@@ -328,28 +413,48 @@
   }
 
   async function connect(wallet: { provider: any, accounts: string[] }) {
-    const browserProvider = new ethers.BrowserProvider(wallet.provider);
-    const n = await browserProvider.getNetwork();
-    const newChainId = Number(n.chainId);
+    // Wallet provider (EIP-1193)
+
+    const transport = custom(wallet.provider);
+    const walletClient = createWalletClient({
+        transport
+    });
+
+    const newChainId = await walletClient.getChainId();
 
     if (chainid !== 0 && chainid !== newChainId) {
       log.info("[TransactionBuilder:connect] Mismatched chainid, attempting to switch", { to: chainid, from: newChainId });
-      signer = await browserProvider.getSigner();
-      await switchNetwork(chainid, wallet);
-      return;
+      try {
+        await walletClient.switchChain({ id: chainid });
+      } catch(e) {
+          console.error("Failed switch chain", e);
+      }
     }
 
     await setProvider(wallet.provider, newChainId);
-    network = n;
   }
 
   async function setProvider(provider: any, newChainId: number) {
-    const browserProvider = new ethers.BrowserProvider(provider);
-    signer = await browserProvider.getSigner();
-    activeProvider = browserProvider;
-    from = await signer.getAddress();
+    // Provider for Wallet Client
+    signer = createWalletClient({
+        transport: custom(provider)
+    });
+
+    // Provider for Public Client (Read)
+    activeProvider = createPublicClient({
+        transport: custom(provider)
+    });
+
+    const addresses = await signer.getAddresses();
+    from = addresses[0];
     chainid = newChainId;
     switchedNetwork = true;
+
+    network = {
+        chainId: BigInt(chainid),
+        name: "Unknown",
+        rpc: []
+    };
 
     log.info("Connected wallet", {from, chainid});
     if (to) toAddressComponent.resolve("connect");
@@ -372,8 +477,9 @@
       data: calldata,
       to: to,
       value: value,
-      hint: selectedFragment?.format("sighash"),
+      hint: selectedFragment ? toFunctionSignature(selectedFragment) : undefined,
     }
+
     if (chainid > 1) state.chainid = chainid.toString();
 
     // Clear unset keys
@@ -401,11 +507,13 @@
       connectWalletComponent.methods.connect("any");
     } else {
       // Fallback provider composed of all the network.rpc[] endpoints
-      activeProvider = new ethers.FallbackProvider(
-        n.rpc.map((url: string) => new ethers.JsonRpcProvider(url))
-      );
+      const transports = n.rpc.map((url: string) => http(url));
+      activeProvider = createPublicClient({
+          transport: fallback(transports)
+      });
+
       chainid = n.chainid;
-      network = await activeProvider.getNetwork();
+      network = n;
       log.info(`Network changed to ${n.name}`, network, activeProvider);
       await loadAddress();
     }
@@ -418,13 +526,21 @@
       return;
     }
     const context = event.detail as { values: string[], resolved: string[] };
-    calldata = selectedFragment && abi.encodeFunctionData(selectedFragment, context.resolved) || "";
+    if (selectedFragment) {
+        calldata = encodeFunctionData({
+            abi: [selectedFragment],
+            functionName: selectedFragment.name,
+            args: context.resolved
+        });
+    } else {
+        calldata = "";
+    }
     functionArgs = context.resolved;
   }
 
-  type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown",ethers.FunctionFragment[]>;
+  type FunctionsByStateMutability = Record<"payable"|"nonpayable"|"readonly"|"unknown", AbiFunction[]>;
 
-  function splitMutability(fns:ethers.FunctionFragment[]): FunctionsByStateMutability {
+  function splitMutability(fns: AbiFunction[]): FunctionsByStateMutability {
     const r : FunctionsByStateMutability = {
       payable: [],
       nonpayable: [],
@@ -435,7 +551,7 @@
     for (const f of fns) {
       if (f.stateMutability === "payable") r.payable.push(f);
       else if (f.stateMutability === "nonpayable") r.nonpayable.push(f);
-      else if (f.stateMutability) r.readonly.push(f);
+      else if (f.stateMutability === "view" || f.stateMutability === "pure") r.readonly.push(f);
       else r.unknown.push(f);
     }
     // Detect whatsabi failing to detect
@@ -486,26 +602,26 @@
       <select bind:value={ selectedFunction } on:change={ updateFunction } disabled={ !editing }>
         <option></option>
         {#each splitFunctions.unknown as f}
-        <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+        <option value={toFunctionSelector(f)}>{toFunctionSignature(f)}</option>
         {/each}
         {#if splitFunctions.payable.length}
         <optgroup label="Payable">
           {#each splitFunctions.payable as f}
-          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          <option value={toFunctionSelector(f)}>{toFunctionSignature(f)}</option>
           {/each}
         </optgroup>
         {/if}
         {#if splitFunctions.nonpayable.length}
         <optgroup label="Writeable">
           {#each splitFunctions.nonpayable as f}
-          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          <option value={toFunctionSelector(f)}>{toFunctionSignature(f)}</option>
           {/each}
         </optgroup>
         {/if}
         {#if splitFunctions.readonly.length}
         <optgroup label="Readable">
           {#each splitFunctions.readonly as f}
-          <option value={f.selector}>{f.format("full").slice("function ".length)}</option>
+          <option value={toFunctionSelector(f)}>{toFunctionSignature(f)}</option>
           {/each}
         </optgroup>
         {/if}
@@ -536,7 +652,7 @@
   {/if}
 
   <section>
-    <Summary to={ toResolved || to } value={value} callSignature={selectedFragment?.format("sighash")} />
+    <Summary to={ toResolved || to } value={value} callSignature={selectedFragment ? toFunctionSignature(selectedFragment) : undefined} />
   </section>
 
   <section>
