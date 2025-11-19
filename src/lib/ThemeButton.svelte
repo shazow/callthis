@@ -3,7 +3,7 @@
   import Sun from './icons/sun.svelte';
   import {onMount} from "svelte";
 
-  let currentTheme;
+  let currentTheme: string;
 
   onMount(() => {
     const theme = document.documentElement.dataset.theme;
@@ -16,7 +16,7 @@
     } else setTheme(userPrefersDarkMode ? "dark" : "light");
   })
 
-  const setTheme = (theme) => {
+  const setTheme = (theme: string) => {
     currentTheme = theme;
     document.documentElement.dataset.theme = theme;
     document.cookie = `theme=${theme};max-age=31536000;path="/"`;
