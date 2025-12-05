@@ -75,7 +75,7 @@
   let connectWalletComponent : ConnectWallet;
   let networkSelectorComponent : NetworkSelector;
 
-  const defaultProvider = ethers.getDefaultProvider("homestead");
+  const defaultProvider = new ethers.JsonRpcProvider("https://ethereum.publicnode.com");
   const defaultChainId = 1;
   let activeProvider : ethers.Provider = defaultProvider;
   let signer : ethers.Signer | undefined = undefined;
@@ -241,7 +241,7 @@
 
     const abiLoaders : Array<loaders.ABILoader> = [
       new loaders.SourcifyABILoader({ chainId: chainid }),
-      new loaders.EtherscanABILoader({ apiKey: env.ETHERSCAN_API_KEY }),
+      new loaders.EtherscanV2ABILoader({ apiKey: env.ETHERSCAN_API_KEY }),
     ];
     if (chainid !== 1) {
       // Add mainnet just in case
